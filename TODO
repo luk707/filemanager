@@ -1,0 +1,14 @@
+- Frontend
+  - MVP
+    - TODO: Add context menu to files in file grid
+      - Delete option
+    - TODO: Add upload button to add a file
+  - Nice to have
+    - TODO: Spotlight view for multimedia files
+    - TODO: Implement drag and drop to upload file / move files
+      - Dragging a file from a desktop or OS file browser onto the webpage should upload the file
+      - Dragging a file within the webapp onto a folder should move the file
+    - TODO: Show option for list / grid view
+    - TODO: Add settings page for view mode (compact), light mode etc.
+    - TODO: Filtering / sorting options
+    - TODO: More file icon types & improved icons
