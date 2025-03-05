@@ -60,7 +60,7 @@ async def upload_file(files: list[UploadFile]):
 
 
 # delete file
-@app.delete("/workspaces/{workspace_id}/{path:path}")
+@app.delete("/workspaces/{workspace_id}/remove/{path:path}")
 async def delete_file(path: str):
     # TODO: Implement logic to delete files from a workspace
     # 1. check that the file path is a valid path to a file or folder
