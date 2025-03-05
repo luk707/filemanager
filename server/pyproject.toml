@@ -1,4 +1,5 @@
 [project]
+package-mode = false
 name = "filemanager-server"
 version = "0.1.0"
 description = ""
