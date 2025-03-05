@@ -15,7 +15,7 @@ export type File = z.infer<typeof FileSchema>;
 const FileArraySchema = z.array(FileSchema);
 
 export async function getFiles(): Promise<File[]> {
-  const response = await fetch("http://127.0.0.1:8000/workspace/files");
+  const response = await fetch("http://127.0.0.1:8000/workspaces/files/stat");
 
   if (!response.ok) {
     throw new Error(`Failed to fetch files: ${response.statusText}`);

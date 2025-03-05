@@ -29,6 +29,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useFileUpload } from "~/hooks/use-file-upload";
 
 // This is sample data.
 const data = {
@@ -80,6 +81,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { handleFileUpload } = useFileUpload("files");
+
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -101,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleFileUpload}>
                   <FileUp />
                   File upload
                   <DropdownMenuShortcut>⌃C+U</DropdownMenuShortcut>
