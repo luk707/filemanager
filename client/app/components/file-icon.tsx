@@ -1,8 +1,10 @@
 import {
   File,
+  FileBox,
   FileImage,
   FileMusic,
   FileSpreadsheet,
+  FileText,
   type LucideProps,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -27,9 +29,20 @@ function GetFileIconComponent(
         overrides: { className: "text-emerald-600" },
       };
     case "image/jpeg":
+    case "image/gif":
       return {
         Component: FileImage,
         overrides: { className: "text-amber-500" },
+      };
+    case "application/x-tgif":
+      return {
+        Component: FileBox,
+        overrides: { className: "text-purple-500" },
+      };
+    case "application/pdf":
+      return {
+        Component: FileText,
+        overrides: { className: "text-blue-500" },
       };
   }
 }
