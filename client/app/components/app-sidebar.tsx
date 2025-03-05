@@ -2,34 +2,40 @@
 
 import * as React from "react";
 import {
-  AudioWaveform,
-  Command,
-  Download,
+  Box,
   Home,
+  PoundSterling,
   Search,
+  Shapes,
   Sparkles,
+  User,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
-import { TeamSwitcher } from "~/components/team-switcher";
+import { WorkspaceSwitcher } from "~/components/workspace-switcher";
 import { Sidebar, SidebarHeader, SidebarRail } from "~/components/ui/sidebar";
 
 // This is sample data.
 const data = {
-  teams: [
+  workspaces: [
     {
-      name: "File Manager",
-      logo: Download,
+      name: "Luke's Workspace",
+      logo: User,
       plan: "Enterprise",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
+      name: "Dan's Workspace",
+      logo: User,
       plan: "Startup",
     },
     {
-      name: "Evil Corp.",
-      logo: Command,
+      name: "Finances",
+      logo: PoundSterling,
+      plan: "Free",
+    },
+    {
+      name: "3D Modelling",
+      logo: Box,
       plan: "Free",
     },
   ],
@@ -40,15 +46,20 @@ const data = {
       icon: Search,
     },
     {
+      title: "Home",
+      url: "#",
+      icon: Home,
+      isActive: true,
+    },
+    {
       title: "Ask AI",
       url: "#",
       icon: Sparkles,
     },
     {
-      title: "Home",
+      title: "Workspaces",
       url: "#",
-      icon: Home,
-      isActive: true,
+      icon: Shapes,
     },
   ],
 };
@@ -57,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <WorkspaceSwitcher workspaces={data.workspaces} />
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarRail />
