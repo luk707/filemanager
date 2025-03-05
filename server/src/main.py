@@ -27,6 +27,7 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     # TODO: Use the path option to filter files in a specific path of the bucket
     # TODO: as well a listing of the files in the directory, we should also list
     #       the folders within the directory
+    # TODO: Check user has read permission for workspace
 
     return [File.from_minio_object(obj) for obj in client.list_objects(workspace_id)]
 
@@ -36,6 +37,8 @@ async def download_file(path: str):
     # TODO: Use this to download files
     #       1. check that there is actually a file at this path
     #       2. stream the content of the file using
+    # -- for a later date --
+    # TODO: Check user has download permission for workspace
     pass
 
 
@@ -43,13 +46,16 @@ async def download_file(path: str):
 async def upload_file(files: list[UploadFile]):
     # TODO: Replace this with the logic to upload a file to the given workspace
     # There may be multiple files in this so you will need to handle all of them
+    # -- for a later date --
+    # TODO: Check user has write permission for workspace
+
     for file in files:
         # TODO: Perform the upload logic
+        # HINT: You can test this logic by using the frontend and uploading a
+        #       file, it is already wired up to this endpoint meaning you can
+        #       use the UI to test it, the /docs url on the api also provides a
+        #       way to test this logic.
         print(file)
-    # HINT: You can test this logic by using the frontend and uploading a file,
-    #       it is already wired up to this endpoint meaning you can use the UI
-    #       to test it, the /docs url on the api also provides a way to test
-    #       this logic.
     pass
 
 
@@ -59,4 +65,6 @@ async def delete_file(path: str):
     # TODO: Implement logic to delete files from a workspace
     # 1. check that the file path is a valid path to a file or folder
     # 2. perform the deletion logic
+    # -- for a later date --
+    # TODO: Check user has write permission for workspace
     pass
