@@ -12,15 +12,7 @@ async def root():
 
 @app.get("/workspace/{bucket_name}")
 async def list_files(bucket_name: str) -> list[File]:
-    return [
-        File(
-            name=obj.object_name,
-            content_type=obj.content_type,
-            size=obj.size,
-            last_modified=obj.last_modified,
-        )
-        for obj in client.list_objects(bucket_name)
-    ]
+    return [File.from_minio_object(obj) for obj in client.list_objects(bucket_name)]
 
 
 @app.post("/files")
