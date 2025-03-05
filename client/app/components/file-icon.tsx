@@ -14,7 +14,7 @@ interface FileIconComponentAndOverrides {
 }
 
 function GetFileIconComponent(
-  contentType: string
+  contentType: string | null
 ): FileIconComponentAndOverrides {
   switch (contentType) {
     default:
@@ -35,7 +35,7 @@ function GetFileIconComponent(
 }
 
 export interface FileIconProps {
-  contentType: string;
+  contentType: string | null;
 }
 
 export function FileIcon({

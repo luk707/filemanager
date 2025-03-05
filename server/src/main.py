@@ -1,16 +1,26 @@
 from fastapi import FastAPI
 from clients.minio import client
+from models.file import File
 
 app = FastAPI()
+
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/files")
-async def list_files(name_of_bucket):
-    return client.list_objects(name_of_bucket)
+@app.get("/workspace/{bucket_name}")
+async def list_files(bucket_name: str) -> list[File]:
+    return [
+        File(
+            name=obj.object_name,
+            content_type=obj.content_type,
+            size=obj.size,
+            last_modified=obj.last_modified,
+        )
+        for obj in client.list_objects(bucket_name)
+    ]
 
 
 @app.post("/files")

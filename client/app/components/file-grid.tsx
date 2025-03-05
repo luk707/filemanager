@@ -10,7 +10,7 @@ export function FileGrid({ files }: FileGridProps) {
     <ul className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
       {files.map((file) => (
         <li
-          key={file.id}
+          key={file.name}
           className="bg-muted/50 hover:bg-muted rounded-lg p-2 border"
         >
           <div className="flex gap-2 p-2">
