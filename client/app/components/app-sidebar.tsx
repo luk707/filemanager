@@ -3,6 +3,9 @@
 import * as React from "react";
 import {
   Box,
+  FileUp,
+  FolderPlus,
+  FolderUp,
   Home,
   Plus,
   PoundSterling,
@@ -90,6 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <DropdownMenuContent align="start" className="w-56">
               <DropdownMenuGroup>
                 <DropdownMenuItem>
+                  <FolderPlus />
                   New folder
                   <DropdownMenuShortcut>⌃C+F</DropdownMenuShortcut>
                 </DropdownMenuItem>
@@ -97,10 +101,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>
+                  <FileUp />
                   File upload
                   <DropdownMenuShortcut>⌃C+U</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
+                  <FolderUp />
                   Folder upload
                   <DropdownMenuShortcut>⌃C+I</DropdownMenuShortcut>
                 </DropdownMenuItem>
