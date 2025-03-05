@@ -28,7 +28,7 @@ export function FileGrid({ files }: FileGridProps) {
           <ContextMenuTrigger asChild>
             <li className="bg-muted/50 hover:bg-muted rounded-lg p-2 border">
               <div className="flex gap-2 p-2">
-                <FileIcon contentType={file.contentType} className="shrink-0" />
+                <FileIcon contentType={file.contentType} />
                 <span className="overflow-ellipsis overflow-hidden whitespace-nowrap select-none">
                   {file.name}
                 </span>

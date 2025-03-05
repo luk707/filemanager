@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "isbot": "^5.1.17",
     "lucide-react": "^0.477.0",
+    "mime-types": "^2.1.35",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.2.0",

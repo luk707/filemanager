@@ -1,49 +1,58 @@
 import {
-  File,
-  FileBox,
-  FileImage,
-  FileMusic,
+  AudioLines,
+  Binary,
+  Braces,
   FileSpreadsheet,
-  FileText,
+  Image,
+  Rotate3D,
+  Text,
+  Type,
   type LucideProps,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { cn } from "~/lib/utils";
 
-interface FileIconComponentAndOverrides {
-  Component: ComponentType<LucideProps>;
-  overrides?: Partial<LucideProps>;
-}
-
-function GetFileIconComponent(
+function getFileIconComponent(
   contentType: string | null
-): FileIconComponentAndOverrides {
+): ComponentType<LucideProps> {
   switch (contentType) {
     default:
-      return { Component: File };
+      return Binary;
     case "audio/wav":
-      return { Component: FileMusic, overrides: { className: "text-red-600" } };
+    case "audio/x-wav":
+      return AudioLines;
     case "text/csv":
-      return {
-        Component: FileSpreadsheet,
-        overrides: { className: "text-emerald-600" },
-      };
+      return FileSpreadsheet;
     case "image/jpeg":
     case "image/gif":
-      return {
-        Component: FileImage,
-        overrides: { className: "text-amber-500" },
-      };
+      return Image;
     case "application/x-tgif":
-      return {
-        Component: FileBox,
-        overrides: { className: "text-purple-500" },
-      };
+      return Rotate3D;
     case "application/pdf":
-      return {
-        Component: FileText,
-        overrides: { className: "text-blue-500" },
-      };
+      return Text;
+    case "font/ttf":
+      return Type;
+    case "text/x-python":
+      return Braces;
+  }
+}
+
+function getFileIconColor(contentType: string | null): string {
+  switch (contentType) {
+    default:
+      return "bg-gray-500";
+    case "audio/wav":
+    case "audio/x-wav":
+      return "bg-red-500";
+    case "application/pdf":
+      return "bg-blue-500";
+    case "image/jpeg":
+    case "image/gif":
+      return "bg-amber-500";
+    case "text/x-python":
+      return "bg-emerald-500";
+    case "application/x-tgif":
+      return "bg-purple-500";
   }
 }
 
@@ -55,7 +64,15 @@ export function FileIcon({
   contentType,
   ...rest
 }: FileIconProps & LucideProps) {
-  const { Component, overrides } = GetFileIconComponent(contentType);
-  const className = cn(overrides?.className, rest.className);
-  return <Component {...overrides} {...rest} className={className} />;
+  const Component = getFileIconComponent(contentType);
+  return (
+    <div
+      className={cn(
+        getFileIconColor(contentType),
+        "w-6 h-6 flex items-center justify-center rounded-sm shrink-0"
+      )}
+    >
+      <Component size={18} strokeWidth={2.5} color="white" {...rest} />
+    </div>
+  );
 }
