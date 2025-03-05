@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+from rich import print
+from clients.minio import client
 
 app = FastAPI()
-
 
 @app.get("/")
 async def root():
@@ -9,9 +10,8 @@ async def root():
 
 
 @app.get("/files")
-async def list_files():
-    # Code to list files will go here
-    pass
+async def list_files(name_of_bucket):
+    return client.list_objects(name_of_bucket)
 
 
 @app.post("/files")
