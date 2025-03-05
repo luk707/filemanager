@@ -10,9 +10,9 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/workspace/{bucket_name}")
-async def list_files(bucket_name: str) -> list[File]:
-    return [File.from_minio_object(obj) for obj in client.list_objects(bucket_name)]
+@app.get("/workspace/{workspace_id}")
+async def list_files(workspace_id: str) -> list[File]:
+    return [File.from_minio_object(obj) for obj in client.list_objects(workspace_id)]
 
 
 @app.post("/files")
