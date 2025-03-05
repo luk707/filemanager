@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   Box,
   Home,
+  Plus,
   PoundSterling,
   Search,
   Shapes,
@@ -14,6 +15,16 @@ import {
 import { NavMain } from "~/components/nav-main";
 import { WorkspaceSwitcher } from "~/components/workspace-switcher";
 import { Sidebar, SidebarHeader, SidebarRail } from "~/components/ui/sidebar";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 // This is sample data.
 const data = {
@@ -69,6 +80,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={data.workspaces} />
+        <div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="lg">
+                <Plus /> New
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  New folder
+                  <DropdownMenuShortcut>⌃C+F</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  File upload
+                  <DropdownMenuShortcut>⌃C+U</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Folder upload
+                  <DropdownMenuShortcut>⌃C+I</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarRail />
