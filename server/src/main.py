@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from rich import print
 from clients.minio import client
 
 app = FastAPI()
