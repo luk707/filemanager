@@ -72,17 +72,16 @@ async def delete_file(workspace_id: str, path: str):
 
     # TODO: Implement logic to delete files from a workspace
     # 1. check that the file path is a valid path to a file or folder
+    if path not in [obj.object_name for obj in client.list_objects(workspace_id)]:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{path} not found from {workspace_id}",
+        )
 
     # 2. perform the deletion logic
 
-    if path not in client.list_objects(workspace_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="File not found",
-        )
-
     client.remove_object(workspace_id, path)
+    return {"message": f"{path} deleted from {workspace_id}"}
 
     # -- for a later date --
     # TODO: Check user has write permission for workspace
-    return {"message": "File deleted"}
