@@ -3,7 +3,7 @@ import { z } from "zod";
 // Define Zod schema
 const FileSchema = z.object({
   name: z.string(),
-  contentType: z.string().nullable(),
+  contentType: z.string(),
   size: z.number(),
   lastModified: z.string(),
 });

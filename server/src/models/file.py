@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from datetime import datetime
-from typing import Optional
 from minio.datatypes import Object
 import mimetypes
 
@@ -10,7 +9,7 @@ class File(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     name: str
-    content_type: Optional[str]
+    content_type: str = "application/octet-stream"
     size: int
     last_modified: datetime
 

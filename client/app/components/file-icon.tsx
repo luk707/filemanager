@@ -5,6 +5,7 @@ import {
   FileSpreadsheet,
   Image,
   Rotate3D,
+  Table,
   Text,
   Type,
   type LucideProps,
@@ -12,52 +13,85 @@ import {
 import type { ComponentType } from "react";
 import { cn } from "~/lib/utils";
 
-function getFileIconComponent(
-  contentType: string | null
-): ComponentType<LucideProps> {
-  switch (contentType) {
+type FileIcon =
+  | "audio"
+  | "ms-excel"
+  | "csv"
+  | "jpeg"
+  | "gif"
+  | "obj"
+  | "pdf"
+  | "font"
+  | "python";
+
+const FILE_ICONS: Record<string, FileIcon> = {
+  "application/pdf": "pdf",
+  "application/vnd.ms-excel.addin.macroEnabled.12": "ms-excel",
+  "application/vnd.ms-excel.sheet.binary.macroEnabled.12": "ms-excel",
+  "application/vnd.ms-excel.sheet.macroEnabled.12": "ms-excel",
+  "application/vnd.ms-excel.template.macroEnabled.12": "ms-excel",
+  "application/vnd.ms-excel": "ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+    "ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.template":
+    "ms-excel",
+  "application/x-tgif": "obj",
+  "audio/wav": "audio",
+  "audio/x-wav": "audio",
+  "font/ttf": "font",
+  "image/gif": "gif",
+  "image/jpeg": "jpeg",
+  "text/csv": "csv",
+  "text/x-python": "python",
+};
+
+function getFileIconComponent(contentType: string): ComponentType<LucideProps> {
+  const iconType: FileIcon | undefined = FILE_ICONS[contentType];
+  switch (iconType) {
     default:
       return Binary;
-    case "audio/wav":
-    case "audio/x-wav":
+    case "audio":
       return AudioLines;
-    case "text/csv":
+    case "csv":
       return FileSpreadsheet;
-    case "image/jpeg":
-    case "image/gif":
+    case "jpeg":
+    case "gif":
       return Image;
-    case "application/x-tgif":
+    case "obj":
       return Rotate3D;
-    case "application/pdf":
+    case "pdf":
       return Text;
-    case "font/ttf":
+    case "font":
       return Type;
-    case "text/x-python":
+    case "python":
       return Braces;
+    case "ms-excel":
+      return Table;
   }
 }
 
-function getFileIconColor(contentType: string | null): string {
-  switch (contentType) {
+function getFileIconColor(contentType: string): string {
+  const iconType: FileIcon | undefined = FILE_ICONS[contentType];
+  switch (iconType) {
     default:
       return "bg-gray-500";
-    case "audio/wav":
-    case "audio/x-wav":
+    case "audio":
       return "bg-red-500";
-    case "application/pdf":
+    case "pdf":
       return "bg-blue-500";
-    case "image/jpeg":
-    case "image/gif":
+    case "jpeg":
+    case "gif":
       return "bg-amber-500";
-    case "text/x-python":
+    case "ms-excel":
+    case "python":
       return "bg-emerald-500";
-    case "application/x-tgif":
+    case "obj":
       return "bg-purple-500";
   }
 }
 
 export interface FileIconProps {
-  contentType: string | null;
+  contentType: string;
 }
 
 export function FileIcon({
