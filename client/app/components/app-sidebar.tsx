@@ -94,12 +94,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Plus /> New
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-64">
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <FolderPlus />
                   New folder
-                  <DropdownMenuShortcut>⌃C+F</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    ⌃C <span className="tracking-normal">then</span> F
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -107,17 +109,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuItem onClick={handleFileUpload}>
                   <FileUp />
                   File upload
-                  <DropdownMenuShortcut>⌃C+U</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    ⌃C <span className="tracking-normal">then</span> U
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <FolderUp />
                   Folder upload
-                  <DropdownMenuShortcut>⌃C+I</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    ⌃C <span className="tracking-normal">then</span> I
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <FileArchive />
                   Archive upload
-                  <DropdownMenuShortcut>⌃C+W</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    ⌃C <span className="tracking-normal">then</span> W
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
