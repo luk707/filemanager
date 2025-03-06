@@ -1,13 +1,25 @@
 import io
-from typing import IO, Optional
+from typing import Optional
 from minio.error import S3Error
 
 from clients.minio import client
 from fastapi import FastAPI, HTTPException, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
 from models.file import File
 from rich import print
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -81,13 +93,11 @@ async def upload_file(workspace_id: str, files: list[UploadFile]):
 # delete file
 @app.delete("/workspaces/{workspace_id}/remove/{path:path}")
 async def delete_file(workspace_id: str, path: str):
-
     # TODO: Implement logic to delete files from a workspace
     # 1. check that the file path is a valid path to a file or folder
     try:
         client.stat_object(workspace_id, path)
     except S3Error:
-
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"404_NOT_FOUND: {path} not found from {workspace_id}",

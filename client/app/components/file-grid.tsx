@@ -1,4 +1,4 @@
-import { type File } from "~/api/files";
+import { removeFile, type File } from "~/api/files";
 import { FileIcon } from "~/components/file-icon";
 import {
   ContextMenu,
@@ -21,12 +21,14 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export interface FileGridProps {
   files: File[];
 }
 
 export function FileGrid({ files }: FileGridProps) {
+  const navigate = useNavigate();
   return (
     <ul className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
       {files.map((file) => (
@@ -83,7 +85,12 @@ export function FileGrid({ files }: FileGridProps) {
               </ContextMenuShortcut>
             </ContextMenuItem>
             <ContextMenuSeparator />
-            <ContextMenuItem>
+            <ContextMenuItem
+              onClick={async () => {
+                await removeFile(file.name);
+                navigate(".", { replace: true });
+              }}
+            >
               <Trash2 />
               Remove file
               <ContextMenuShortcut>

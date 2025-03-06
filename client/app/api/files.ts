@@ -25,3 +25,16 @@ export async function getFiles(): Promise<File[]> {
 
   return FileArraySchema.parse(data); // Validate and return parsed data
 }
+
+export async function removeFile(path: string): Promise<void> {
+  const response = await fetch(
+    `http://127.0.0.1:8000/workspaces/files/remove/${path}`,
+    {
+      method: "delete",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete ${path}: ${response.statusText}`);
+  }
+}

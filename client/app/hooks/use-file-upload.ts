@@ -1,7 +1,9 @@
 import { useCallback } from "react";
+import { useNavigate } from "react-router";
 import { uploadFileToWorkspace } from "~/api/upload";
 
 export function useFileUpload(workspaceId: string) {
+  const navigate = useNavigate();
   const handleFileUpload = useCallback(async () => {
     try {
       // Open file picker
@@ -10,6 +12,7 @@ export function useFileUpload(workspaceId: string) {
 
       // Upload file
       await uploadFileToWorkspace(file, workspaceId);
+      navigate(".", { replace: true });
     } catch (error) {
       console.error("File selection failed:", error);
     }

@@ -35,8 +35,8 @@ export default function Shell() {
                       Luke's Workspace
                     </span>
                   </BreadcrumbPage>
-                  <BreadcrumbSeparator>/</BreadcrumbSeparator>
                 </BreadcrumbItem>
+                <BreadcrumbSeparator>/</BreadcrumbSeparator>
               </BreadcrumbList>
             </Breadcrumb>
           </div>

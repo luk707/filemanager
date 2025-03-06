@@ -7,6 +7,10 @@ export async function loader({}: Route.LoaderArgs) {
   return await getFiles();
 }
 
+export async function clientLoader({}: Route.ClientLoaderArgs) {
+  return await getFiles();
+}
+
 export default function FileBrowser({ loaderData }: Route.ComponentProps) {
   const files = loaderData;
   return (
