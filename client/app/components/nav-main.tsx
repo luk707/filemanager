@@ -16,6 +16,7 @@ export function NavMain({
     url: string;
     icon: LucideIcon;
     isActive?: boolean;
+    shortcut?: string;
   }[];
 }) {
   return (
@@ -25,7 +26,12 @@ export function NavMain({
           <SidebarMenuButton asChild isActive={item.isActive}>
             <a href={item.url} className="cursor-default">
               <item.icon />
-              <span>{item.title}</span>
+              <span className="shrink-0">{item.title}</span>
+              {item.shortcut && (
+                <span className="text-muted-foreground text-xs ml-auto tracking-widest">
+                  {item.shortcut}
+                </span>
+              )}
             </a>
           </SidebarMenuButton>
         </SidebarMenuItem>

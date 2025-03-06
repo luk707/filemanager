@@ -60,6 +60,7 @@ const data = {
       title: "Search",
       url: "#",
       icon: Search,
+      shortcut: "⌘K",
     },
     {
       title: "Home",
