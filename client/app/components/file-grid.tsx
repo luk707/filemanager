@@ -85,7 +85,7 @@ export function FileGrid({ files }: FileGridProps) {
             <ContextMenuSeparator />
             <ContextMenuItem>
               <Trash2 />
-              Move to trash
+              Remove file
               <ContextMenuShortcut>
                 <span className="tracking-normal">Delete</span>
               </ContextMenuShortcut>
