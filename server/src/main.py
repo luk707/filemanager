@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, HTTPException, status
 from clients.minio import client
 from models.file import File
 from rich import print
@@ -21,6 +21,14 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     # 2. if the path is a directory or root, we should instead return a
     #    directory listing for the client to display, i.e. a list[File]
 
+    if path:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Directory listings not yet supported",
+        )
+
+    return [File.from_minio_object(obj) for obj in client.list_objects(workspace_id)]
+
     # -- for a later date --
     # TODO: Return a union list when listing i.e list[File|Folder] to tell the
     #       client what folders exist in the current path
@@ -28,8 +36,6 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     # TODO: as well a listing of the files in the directory, we should also list
     #       the folders within the directory
     # TODO: Check user has read permission for workspace
-
-    return [File.from_minio_object(obj) for obj in client.list_objects(workspace_id)]
 
 
 @app.get("/workspaces/{workspace_id}/download/{path:path}")
