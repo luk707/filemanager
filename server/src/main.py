@@ -1,4 +1,6 @@
-from typing import Optional
+import io
+from typing import IO, Optional
+from minio.error import S3Error
 
 from clients.minio import client
 from fastapi import FastAPI, HTTPException, UploadFile, status
@@ -50,7 +52,7 @@ async def download_file(path: str):
 
 
 @app.post("/workspaces/{workspace_id}/upload")
-async def upload_file(files: list[UploadFile]):
+async def upload_file(workspace_id: str, files: list[UploadFile]):
     # TODO: Replace this with the logic to upload a file to the given workspace
     # There may be multiple files in this so you will need to handle all of them
     # -- for a later date --
@@ -58,6 +60,16 @@ async def upload_file(files: list[UploadFile]):
 
     for file in files:
         # TODO: Perform the upload logic
+
+        file_stream = io.BytesIO(await file.read())
+        client.put_object(
+            workspace_id,
+            file.filename,
+            file_stream,
+            length=file.size,
+            content_type=file.content_type,
+        )
+
         # HINT: You can test this logic by using the frontend and uploading a
         #       file, it is already wired up to this endpoint meaning you can
         #       use the UI to test it, the /docs url on the api also provides a
@@ -72,7 +84,10 @@ async def delete_file(workspace_id: str, path: str):
 
     # TODO: Implement logic to delete files from a workspace
     # 1. check that the file path is a valid path to a file or folder
-    if path not in [obj.object_name for obj in client.list_objects(workspace_id)]:
+    try:
+        client.stat_object(workspace_id, path)
+    except S3Error:
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"404_NOT_FOUND: {path} not found from {workspace_id}",
