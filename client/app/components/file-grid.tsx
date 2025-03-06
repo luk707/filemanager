@@ -1,5 +1,5 @@
 import { type File } from "~/api/files";
-import { FileIcon } from "./file-icon";
+import { FileIcon } from "~/components/file-icon";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -10,11 +10,17 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
   ContextMenuSeparator,
-  ContextMenuCheckboxItem,
-  ContextMenuRadioGroup,
-  ContextMenuLabel,
-  ContextMenuRadioItem,
 } from "~/components/ui/context-menu";
+import {
+  Download,
+  Files,
+  FolderInput,
+  FolderOpen,
+  Info,
+  PencilLine,
+  Star,
+  Trash2,
+} from "lucide-react";
 
 export interface FileGridProps {
   files: File[];
@@ -37,48 +43,53 @@ export function FileGrid({ files }: FileGridProps) {
             </li>
           </ContextMenuTrigger>
           <ContextMenuContent className="w-64">
-            <ContextMenuItem inset>
-              Back
-              <ContextMenuShortcut>⌘[</ContextMenuShortcut>
+            <ContextMenuItem>
+              <Download />
+              Download
             </ContextMenuItem>
-            <ContextMenuItem inset disabled>
-              Forward
-              <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+            <ContextMenuItem>
+              <PencilLine />
+              Rename
+              <ContextMenuShortcut>⌥⌘E</ContextMenuShortcut>
             </ContextMenuItem>
-            <ContextMenuItem inset>
-              Reload
+            <ContextMenuItem>
+              <Files />
+              Make a copy
               <ContextMenuShortcut>⌘R</ContextMenuShortcut>
             </ContextMenuItem>
+            <ContextMenuSeparator />
             <ContextMenuSub>
-              <ContextMenuSubTrigger inset>More Tools</ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-48">
+              <ContextMenuSubTrigger>
+                <FolderOpen /> Organize
+              </ContextMenuSubTrigger>
+              <ContextMenuSubContent className="w-52">
                 <ContextMenuItem>
-                  Save Page As...
-                  <ContextMenuShortcut>⇧⌘S</ContextMenuShortcut>
+                  <FolderInput />
+                  Move
+                  <ContextMenuShortcut>⌥⌘M</ContextMenuShortcut>
                 </ContextMenuItem>
-                <ContextMenuItem>Create Shortcut...</ContextMenuItem>
-                <ContextMenuItem>Name Window...</ContextMenuItem>
-                <ContextMenuSeparator />
-                <ContextMenuItem>Developer Tools</ContextMenuItem>
+                <ContextMenuItem>
+                  <Star />
+                  Add to favorites
+                  <ContextMenuShortcut>⌥⌘S</ContextMenuShortcut>
+                </ContextMenuItem>
               </ContextMenuSubContent>
             </ContextMenuSub>
+            <ContextMenuItem>
+              <Info />
+              File details
+              <ContextMenuShortcut>
+                ⌥V <span className="tracking-normal">then</span> D
+              </ContextMenuShortcut>
+            </ContextMenuItem>
             <ContextMenuSeparator />
-            <ContextMenuCheckboxItem checked>
-              Show Bookmarks Bar
-              <ContextMenuShortcut>⌘⇧B</ContextMenuShortcut>
-            </ContextMenuCheckboxItem>
-            <ContextMenuCheckboxItem>Show Full URLs</ContextMenuCheckboxItem>
-            <ContextMenuSeparator />
-            <ContextMenuRadioGroup value="pedro">
-              <ContextMenuLabel inset>People</ContextMenuLabel>
-              <ContextMenuSeparator />
-              <ContextMenuRadioItem value="pedro">
-                Pedro Duarte
-              </ContextMenuRadioItem>
-              <ContextMenuRadioItem value="colm">
-                Colm Tuite
-              </ContextMenuRadioItem>
-            </ContextMenuRadioGroup>
+            <ContextMenuItem>
+              <Trash2 />
+              Move to trash
+              <ContextMenuShortcut>
+                <span className="tracking-normal">Delete</span>
+              </ContextMenuShortcut>
+            </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
       ))}
