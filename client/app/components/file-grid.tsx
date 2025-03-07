@@ -22,6 +22,17 @@ import {
   Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import {
+  AlertDialog,
+  AlertDialogActionDestructive,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 
 export interface FileGridProps {
   files: File[];
@@ -32,73 +43,94 @@ export function FileGrid({ files }: FileGridProps) {
   return (
     <ul className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
       {files.map((file) => (
-        <ContextMenu key={file.name}>
-          <ContextMenuTrigger asChild>
-            <li className="bg-muted/50 hover:bg-muted rounded-lg p-2 border">
-              <div className="flex gap-2 p-2">
-                <FileIcon contentType={file.contentType} />
-                <span className="overflow-ellipsis overflow-hidden whitespace-nowrap select-none">
-                  {file.name}
-                </span>
-              </div>
-              <div className="aspect-[4/3] bg-white rounded-md" />
-            </li>
-          </ContextMenuTrigger>
-          <ContextMenuContent className="w-64">
-            <ContextMenuItem>
-              <Download />
-              Download
-            </ContextMenuItem>
-            <ContextMenuItem>
-              <PencilLine />
-              Rename
-              <ContextMenuShortcut>⌥⌘E</ContextMenuShortcut>
-            </ContextMenuItem>
-            <ContextMenuItem>
-              <Files />
-              Make a copy
-              <ContextMenuShortcut>⌘R</ContextMenuShortcut>
-            </ContextMenuItem>
-            <ContextMenuSeparator />
-            <ContextMenuSub>
-              <ContextMenuSubTrigger>
-                <FolderOpen /> Organize
-              </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-52">
+        <AlertDialog>
+          <ContextMenu key={file.name}>
+            <ContextMenuTrigger asChild>
+              <li className="bg-muted/50 hover:bg-muted rounded-lg p-2 border">
+                <div className="flex gap-2 p-2">
+                  <FileIcon contentType={file.contentType} />
+                  <span className="overflow-ellipsis overflow-hidden whitespace-nowrap select-none">
+                    {file.name}
+                  </span>
+                </div>
+                <div className="aspect-[4/3] bg-white rounded-md" />
+              </li>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-64">
+              <ContextMenuItem>
+                <Download />
+                Download
+              </ContextMenuItem>
+              <ContextMenuItem>
+                <PencilLine />
+                Rename
+                <ContextMenuShortcut>⌥⌘E</ContextMenuShortcut>
+              </ContextMenuItem>
+              <ContextMenuItem>
+                <Files />
+                Make a copy
+                <ContextMenuShortcut>⌘R</ContextMenuShortcut>
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                  <FolderOpen /> Organize
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent className="w-52">
+                  <ContextMenuItem>
+                    <FolderInput />
+                    Move
+                    <ContextMenuShortcut>⌥⌘M</ContextMenuShortcut>
+                  </ContextMenuItem>
+                  <ContextMenuItem>
+                    <Star />
+                    Add to favorites
+                    <ContextMenuShortcut>⌥⌘S</ContextMenuShortcut>
+                  </ContextMenuItem>
+                </ContextMenuSubContent>
+              </ContextMenuSub>
+              <ContextMenuItem>
+                <Info />
+                File details
+                <ContextMenuShortcut>
+                  ⌥V <span className="tracking-normal">then</span> D
+                </ContextMenuShortcut>
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <AlertDialogTrigger asChild>
                 <ContextMenuItem>
-                  <FolderInput />
-                  Move
-                  <ContextMenuShortcut>⌥⌘M</ContextMenuShortcut>
+                  <Trash2 />
+                  Remove file
+                  <ContextMenuShortcut>
+                    <span className="tracking-normal">Delete</span>
+                  </ContextMenuShortcut>
                 </ContextMenuItem>
-                <ContextMenuItem>
-                  <Star />
-                  Add to favorites
-                  <ContextMenuShortcut>⌥⌘S</ContextMenuShortcut>
-                </ContextMenuItem>
-              </ContextMenuSubContent>
-            </ContextMenuSub>
-            <ContextMenuItem>
-              <Info />
-              File details
-              <ContextMenuShortcut>
-                ⌥V <span className="tracking-normal">then</span> D
-              </ContextMenuShortcut>
-            </ContextMenuItem>
-            <ContextMenuSeparator />
-            <ContextMenuItem
-              onClick={async () => {
-                await removeFile(file.name);
-                navigate(".", { replace: true });
-              }}
-            >
-              <Trash2 />
-              Remove file
-              <ContextMenuShortcut>
-                <span className="tracking-normal">Delete</span>
-              </ContextMenuShortcut>
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
+              </AlertDialogTrigger>
+            </ContextMenuContent>
+          </ContextMenu>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Are you sure you want to delete "{file.name}"?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete "
+                {file.name}".
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogActionDestructive
+                onClick={async () => {
+                  await removeFile(file.name);
+                  navigate(".", { replace: true });
+                }}
+              >
+                Delete
+              </AlertDialogActionDestructive>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       ))}
     </ul>
   );
