@@ -1,4 +1,4 @@
-import { removeFile, type File } from "~/api/files";
+import { downloadFile, removeFile, type File } from "~/api/files";
 import { FileIcon } from "~/components/file-icon";
 import {
   ContextMenu,
@@ -57,7 +57,11 @@ export function FileGrid({ files }: FileGridProps) {
               </li>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-64">
-              <ContextMenuItem>
+              <ContextMenuItem
+                onClick={async () => {
+                  await downloadFile(file.name);
+                }}
+              >
                 <Download />
                 Download
               </ContextMenuItem>
