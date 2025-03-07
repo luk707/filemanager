@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Define Zod schema
 const FileSchema = z.object({
   name: z.string(),
   contentType: z.string(),
@@ -36,7 +35,7 @@ export async function getFiles(workspaceId: string, path?: string) {
 
   const data = await response.json();
 
-  return z.array(FileSchema).parse(data); // Validate and return parsed data
+  return z.array(FileSchema).parse(data);
 }
 
 export async function removeFile(workspaceId: string, path: string) {
@@ -65,7 +64,7 @@ export function downloadFile(workspaceId: string, path: string) {
 
 export async function uploadFileToWorkspace(file: File, workspaceId: string) {
   const formData = new FormData();
-  formData.append("files", file); // FastAPI expects a list, but can handle single uploads
+  formData.append("files", file);
 
   try {
     const response = await fetch(urls.uploadFile(workspaceId), {
