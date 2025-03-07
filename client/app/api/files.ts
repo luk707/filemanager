@@ -14,8 +14,17 @@ export type File = z.infer<typeof FileSchema>;
 // Define an array schema for validation
 const FileArraySchema = z.array(FileSchema);
 
-export async function getFiles(): Promise<File[]> {
-  const response = await fetch("http://127.0.0.1:8000/workspaces/files/stat");
+export async function getFiles(
+  workspaceId: string,
+  path?: string
+): Promise<File[]> {
+  const response = await fetch(
+    path
+      ? `${
+          import.meta.env.VITE_API_BASE_URL
+        }/workspaces/${workspaceId}/stat/${path}`
+      : `${import.meta.env.VITE_API_BASE_URL}/workspaces/${workspaceId}/stat`
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch files: ${response.statusText}`);
@@ -26,9 +35,14 @@ export async function getFiles(): Promise<File[]> {
   return FileArraySchema.parse(data); // Validate and return parsed data
 }
 
-export async function removeFile(path: string): Promise<void> {
+export async function removeFile(
+  workspaceId: string,
+  path: string
+): Promise<void> {
   const response = await fetch(
-    `http://127.0.0.1:8000/workspaces/files/remove/${path}`,
+    `${
+      import.meta.env.VITE_API_BASE_URL
+    }/workspaces/${workspaceId}/remove/${path}`,
     {
       method: "delete",
     }
@@ -39,8 +53,12 @@ export async function removeFile(path: string): Promise<void> {
   }
 }
 
-export function downloadFile(path: string): Promise<void> {
-  return fetch(`http://127.0.0.1:8000/workspaces/files/download/${path}`)
+export function downloadFile(workspaceId: string, path: string): Promise<void> {
+  return fetch(
+    `${
+      import.meta.env.VITE_API_BASE_URL
+    }/workspaces/${workspaceId}/download/${path}`
+  )
     .then((response) => response.blob())
     .then((blob) => {
       const link = document.createElement("a");

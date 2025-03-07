@@ -4,7 +4,7 @@ export async function uploadFileToWorkspace(file: File, workspaceId: string) {
 
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/workspaces/${workspaceId}/upload`,
+      `${import.meta.env.VITE_API_BASE_URL}/workspaces/${workspaceId}/upload`,
       {
         method: "POST",
         body: formData,
