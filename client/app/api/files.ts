@@ -8,9 +8,6 @@ const FileSchema = z.object({
   lastModified: z.string(),
 });
 
-// Define an array schema for validation
-const FileArraySchema = z.array(FileSchema);
-
 const urls = {
   getFiles: (workspaceId: string, path?: string) =>
     path
@@ -39,7 +36,7 @@ export async function getFiles(workspaceId: string, path?: string) {
 
   const data = await response.json();
 
-  return FileArraySchema.parse(data); // Validate and return parsed data
+  return z.array(FileSchema).parse(data); // Validate and return parsed data
 }
 
 export async function removeFile(workspaceId: string, path: string) {
