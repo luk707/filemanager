@@ -8,16 +8,10 @@ const FileSchema = z.object({
   lastModified: z.string(),
 });
 
-// Define TypeScript type from Zod schema
-export type File = z.infer<typeof FileSchema>;
-
 // Define an array schema for validation
 const FileArraySchema = z.array(FileSchema);
 
-export async function getFiles(
-  workspaceId: string,
-  path?: string
-): Promise<File[]> {
+export async function getFiles(workspaceId: string, path?: string) {
   const response = await fetch(
     path
       ? `${
@@ -35,10 +29,7 @@ export async function getFiles(
   return FileArraySchema.parse(data); // Validate and return parsed data
 }
 
-export async function removeFile(
-  workspaceId: string,
-  path: string
-): Promise<void> {
+export async function removeFile(workspaceId: string, path: string) {
   const response = await fetch(
     `${
       import.meta.env.VITE_API_BASE_URL
@@ -53,7 +44,7 @@ export async function removeFile(
   }
 }
 
-export function downloadFile(workspaceId: string, path: string): Promise<void> {
+export function downloadFile(workspaceId: string, path: string) {
   return fetch(
     `${
       import.meta.env.VITE_API_BASE_URL
@@ -69,4 +60,27 @@ export function downloadFile(workspaceId: string, path: string): Promise<void> {
       link.click();
     })
     .catch(console.error);
+}
+
+export async function uploadFileToWorkspace(file: File, workspaceId: string) {
+  const formData = new FormData();
+  formData.append("files", file); // FastAPI expects a list, but can handle single uploads
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/workspaces/${workspaceId}/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+
+    console.log("File uploaded successfully!");
+  } catch (error) {
+    console.error("Error uploading file:", error);
+  }
 }
