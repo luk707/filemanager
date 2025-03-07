@@ -34,9 +34,9 @@ async def add_process_time_header(request: Request, call_next):
     process_time = time.perf_counter() - start_time
     response.headers["X-Process-Time"] = str(process_time)
     logger.info(
-        f"Processed [{request.method}]: "
-        f"{request.scope['root_path']}{request.scope['route'].path} "
-        f"for {humanize.naturaldelta(process_time, minimum_unit='milliseconds')}"
+        f"{request.client.host}:{request.client.port} - "
+        f'"{request.method} {request.url.path} HTTP/{request.scope.get("http_version", "unknown")}" '
+        f"took {humanize.naturaldelta(process_time, minimum_unit='milliseconds')}"
     )
     return response
 
