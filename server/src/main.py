@@ -103,7 +103,6 @@ async def download_file(workspace_id: str, path: str):
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
 
-
 @app.post("/workspaces/{workspace_id}/upload/{directory_path}")
 async def upload_file(workspace_id: str, files: list[UploadFile], directory_path: Optional[str] = ""):
   # Loop through each file in the list of files
@@ -163,15 +162,18 @@ async def create_directory(workspace_id: str, directory_path: str):
 async def delete_directory(workspace_id: str, directory_path: str):
 
     try:
-      objects = list(client.list_objects(workspace_id, prefix=directory_path +"/"))
-      
-      if len(objects) == 1 and objects[0].object_name == directory_path + "/":
-          client.remove_object(workspace_id, directory_path +"/")
-          return {"message": f"DELETED {directory_path} in {workspace_id}"}
+      try:
+          objects = list(client.list_objects(workspace_id, prefix=directory_path + "/"))[:2] # check if there is more than one object in this path
 
-      for obj in objects:
+      except IndexError:
+        # if only one object is found, it is the directory itself
+          client.remove_object(workspace_id, directory_path + "/")
+          return {"message": f"DELETED {directory_path} in {workspace_id}"}
+          
+      # if more than one object is found, delete all objects in this path
+      for obj in client.list_objects(workspace_id, prefix=directory_path + "/", recursive=True): # recursive=True to remove ALL objects in this path
           client.remove_object(workspace_id, obj.object_name)
-          return {"message": f"DELETED {directory_path} from {workspace_id}"}
+      return {"message": f"DELETED {directory_path} from {workspace_id}"}
         
     except S3Error:
       raise HTTPException(
