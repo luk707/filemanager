@@ -1,5 +1,4 @@
 import { FileGrid } from "~/components/file-grid";
-import { Button } from "~/components/ui/button";
 import { getFiles } from "~/api/files";
 import type { Route } from "./+types/file-browser";
 
@@ -16,11 +15,11 @@ export async function clientLoader({}: Route.ClientLoaderArgs) {
 export default function FileBrowser({ loaderData }: Route.ComponentProps) {
   const files = loaderData;
   return (
-    <>
+    <div className="px-3 pb-3">
       <h2 className="text-muted-foreground font-bold pb-2 select-none">
         Files
       </h2>
       <FileGrid files={files} />
-    </>
+    </div>
   );
 }

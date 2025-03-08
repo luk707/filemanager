@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const FileSchema = z.object({
+export const FileSchema = z.object({
   name: z.string(),
   contentType: z.string(),
   size: z.number(),
