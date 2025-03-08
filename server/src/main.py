@@ -104,7 +104,8 @@ async def download_file(workspace_id: str, path: str):
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
 
-@app.post("/workspaces/{workspace_id}/upload/{directory_path}")
+@app.post("/workspaces/{workspace_id}/upload")
+@app.post("/workspaces/{workspace_id}/upload/{directory_path:path}")
 async def upload_file(workspace_id: str, files: list[UploadFile], directory_path: Optional[str] = ""):
   # Loop through each file in the list of files
   for file in files:
@@ -145,7 +146,7 @@ async def delete_file(workspace_id: str, path: str):
     # see @stat()
 
 
-@app.get("/workspaces/{workspace_id}/directory/{directory_path}")
+@app.post("/workspaces/{workspace_id}/directory/{directory_path}")
 async def create_directory(workspace_id: str, directory_path: str):
   empty_data = bytes()
   data_stream = io.BytesIO(empty_data)
