@@ -184,7 +184,7 @@ async def create_directory(workspace_id: str, directory_path: str):
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_directory(workspace_id: str, directory_path: str):
-    errors_list: list[str] = []
+    errors_count: int = 0
     del_list: list[str] = []
 
     objects = list((client.list_objects(workspace_id, prefix=directory_path + "/")))
@@ -197,9 +197,11 @@ async def delete_directory(workspace_id: str, directory_path: str):
     )
 
     for error in errors:
-        errors_list = errors_list.append(
-            f"{error} deleted {len(errors)} / {len(del_list)}"
+        logger.warning(
+            f"{error} deleted {errors_count} / {len(del_list)} objects from {directory_path} in {workspace_id}"
         )
+        errors_count += 1
 
-    if errors_list != []:
-        return errors_list
+    logger.info(
+        f"DELETED {errors_count} / {len(del_list)} objects from {directory_path} in {workspace_id}"
+    )
