@@ -11,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
 from models.file import File
-from rich import print
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")
@@ -126,21 +125,27 @@ async def download_file(workspace_id: str, path: str):
 @app.post("/workspaces/{workspace_id}/upload")
 @app.post("/workspaces/{workspace_id}/upload/{directory_path:path}")
 async def upload_file(workspace_id: str, files: list[UploadFile], directory_path: Optional[str] = ""):
-  # Loop through each file in the list of files
-  for file in files:
-    path = os.path.join(directory_path, file.filename) if directory_path else file.filename
-    
-    file_stream = io.BytesIO(await file.read())
-    
-    client.put_object(
-      workspace_id,
-      path,
-      file_stream,
-      length=file.size,
-      content_type=file.content_type,
-    )
-    
-    print(file) # should this be moved into logging?
+    # Loop through each file in the list of files
+    for file in files:
+        path = (
+            os.path.join(directory_path, file.filename)
+            if directory_path
+            else file.filename
+        )
+
+        file_stream = io.BytesIO(await file.read())
+
+        client.put_object(
+            workspace_id,
+            path,
+            file_stream,
+            length=file.size,
+            content_type=file.content_type,
+        )
+
+        logging.info(
+            f"UPLOADED {file.filename} ({humanize.naturalsize(file.size)}) to {workspace_id}/{path}"
+        )
 
 
 # delete file
