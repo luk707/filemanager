@@ -20,6 +20,8 @@ The frontend can be run simply by running `npm run dev` in the `client` director
 
 Dependencies can be installed using `npm install` to fetch new dependencies and `npm install <NAME_OF_DEP>` to add a new dependency.
 
+Unit tests can be run using `npm test`.
+
 ## Tips
 
 ### Installing node and npm
