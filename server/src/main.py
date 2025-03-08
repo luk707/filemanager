@@ -195,18 +195,26 @@ async def delete_directory(workspace_id: str, directory_path: str):
     objects = list((client.list_objects(workspace_id, prefix=directory_path + "/")))
 
     for i in objects:
+        logger.debug(f"Adding {i.object_name} to delete list")
         del_list.append(DeleteObject(i.object_name))
     errors = client.remove_objects(
         workspace_id,
         del_list,
     )
 
+    logger.info(f"Added {len(del_list)} objects to be removed")
+
     for error in errors:
-        logger.warning(
-            f"{error} deleted {errors_count} / {len(del_list)} objects from {directory_path} in {workspace_id}"
-        )
         errors_count += 1
+        logger.warning(
+            f"Failed to delete object '{error.name}' with error code '{error.code}'."
+        )
+
+    if errors_count != 0:
+        logger.warning(
+            f"FAILED to delete {errors_count} object(s) from {directory_path} in {workspace_id}"
+        )
 
     logger.info(
-        f"DELETED {errors_count} / {len(del_list)} objects from {directory_path} in {workspace_id}"
+        f"DELETED {len(del_list) - errors_count} object(s) from {directory_path} in {workspace_id}. Deleted {len(del_list)} total object(s)."
     )
