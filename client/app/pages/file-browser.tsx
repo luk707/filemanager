@@ -4,11 +4,13 @@ import { getFiles } from "~/api/files";
 import type { Route } from "./+types/file-browser";
 
 export async function loader({}: Route.LoaderArgs) {
-  return await getFiles();
+  // TODO: Remove hardcoded workspaceId
+  return await getFiles("files");
 }
 
 export async function clientLoader({}: Route.ClientLoaderArgs) {
-  return await getFiles();
+  // TODO: Remove hardcoded workspaceId
+  return await getFiles("files");
 }
 
 export default function FileBrowser({ loaderData }: Route.ComponentProps) {

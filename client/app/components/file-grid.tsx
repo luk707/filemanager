@@ -59,7 +59,8 @@ export function FileGrid({ files }: FileGridProps) {
             <ContextMenuContent className="w-64">
               <ContextMenuItem
                 onClick={async () => {
-                  await downloadFile(file.name);
+                  // TODO: Remove hardcoded workspaceId
+                  await downloadFile("files", file.name);
                 }}
               >
                 <Download />
@@ -126,7 +127,8 @@ export function FileGrid({ files }: FileGridProps) {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogActionDestructive
                 onClick={async () => {
-                  await removeFile(file.name);
+                  // TODO: Remove hardcoded workspaceId
+                  await removeFile("files", file.name);
                   navigate(".", { replace: true });
                 }}
               >
