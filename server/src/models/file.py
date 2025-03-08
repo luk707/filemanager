@@ -28,5 +28,5 @@ class File(BaseModel):
           last_modified=obj.last_modified,
           basename=obj_name.split("/")[-1].split(".")[0],
           path="/".join(obj_name.split("/")[:-1]) if len(obj_name.split("/")) > 1 else "/",
-          is_dir=True if obj_name.endswith("/") else False
+          is_dir=obj_name.endswith("/")
           )
