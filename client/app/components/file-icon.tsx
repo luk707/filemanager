@@ -13,18 +13,17 @@ import {
 import type { ComponentType } from "react";
 import { cn } from "~/lib/utils";
 
-type FileIcon =
+export type FileIcon =
   | "audio"
   | "ms-excel"
   | "csv"
-  | "jpeg"
-  | "gif"
+  | "image"
   | "obj"
   | "pdf"
   | "font"
   | "python";
 
-const FILE_ICONS: Record<string, FileIcon> = {
+export const FILE_ICONS: Record<string, FileIcon> = {
   "application/pdf": "pdf",
   "application/vnd.ms-excel.addin.macroEnabled.12": "ms-excel",
   "application/vnd.ms-excel.sheet.binary.macroEnabled.12": "ms-excel",
@@ -39,56 +38,33 @@ const FILE_ICONS: Record<string, FileIcon> = {
   "audio/wav": "audio",
   "audio/x-wav": "audio",
   "font/ttf": "font",
-  "image/gif": "gif",
-  "image/jpeg": "jpeg",
+  "image/gif": "image",
+  "image/jpeg": "image",
   "text/csv": "csv",
   "text/x-python": "python",
 };
 
-function getFileIconComponent(contentType: string): ComponentType<LucideProps> {
-  const iconType: FileIcon | undefined = FILE_ICONS[contentType];
-  switch (iconType) {
-    default:
-      return Binary;
-    case "audio":
-      return AudioLines;
-    case "csv":
-      return FileSpreadsheet;
-    case "jpeg":
-    case "gif":
-      return Image;
-    case "obj":
-      return Rotate3D;
-    case "pdf":
-      return Text;
-    case "font":
-      return Type;
-    case "python":
-      return Braces;
-    case "ms-excel":
-      return Table;
-  }
-}
+const FILE_ICON_COMPONENTS: Record<FileIcon, ComponentType<LucideProps>> = {
+  audio: AudioLines,
+  csv: FileSpreadsheet,
+  image: Image,
+  obj: Rotate3D,
+  pdf: Text,
+  font: Type,
+  python: Braces,
+  "ms-excel": Table,
+};
 
-function getFileIconColor(contentType: string): string {
-  const iconType: FileIcon | undefined = FILE_ICONS[contentType];
-  switch (iconType) {
-    default:
-      return "bg-gray-500";
-    case "audio":
-      return "bg-red-500";
-    case "pdf":
-      return "bg-blue-500";
-    case "jpeg":
-    case "gif":
-      return "bg-amber-500";
-    case "ms-excel":
-    case "python":
-      return "bg-emerald-500";
-    case "obj":
-      return "bg-purple-500";
-  }
-}
+const FILE_ICON_COLORS: Record<FileIcon, string> = {
+  audio: "bg-red-500",
+  pdf: "bg-blue-500",
+  image: "bg-amber-500",
+  "ms-excel": "bg-emerald-500",
+  obj: "bg-purple-500",
+  python: "bg-emerald-500",
+  csv: "bg-emerald-500",
+  font: "bg-gray-500",
+};
 
 export interface FileIconProps {
   contentType: string;
@@ -98,11 +74,13 @@ export function FileIcon({
   contentType,
   ...rest
 }: FileIconProps & LucideProps) {
-  const Component = getFileIconComponent(contentType);
+  const fileIcon = FILE_ICONS[contentType];
+  const Component = FILE_ICON_COMPONENTS[fileIcon] ?? Binary;
+  const fileIconColor = FILE_ICON_COLORS[fileIcon] ?? "bg-gray-500";
   return (
     <div
       className={cn(
-        getFileIconColor(contentType),
+        fileIconColor,
         "w-6 h-6 flex items-center justify-center rounded-sm shrink-0"
       )}
     >
