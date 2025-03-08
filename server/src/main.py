@@ -1,16 +1,20 @@
 import io
 import os
 from typing import Optional
+import time
+import logging
 
 from clients.minio import client
-from fastapi import FastAPI, HTTPException, Response, UploadFile, status
+from fastapi import FastAPI, HTTPException, Response, UploadFile, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from minio.error import S3Error
 from models.file import File
 from rich import print
 from itertools import islice
+import humanize
 
 app = FastAPI()
+logger = logging.getLogger("uvicorn.error")
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +26,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    logger.info(
+        f"{request.client.host}:{request.client.port} - "
+        f'"{request.method} {request.url.path} HTTP/{request.scope.get("http_version", "unknown")}" '
+        f"took {humanize.naturaldelta(process_time, minimum_unit='milliseconds')}"
+    )
+    return response
 
 
 @app.get("/")
@@ -77,6 +95,7 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     # TODO: Check user has read permission for workspace
 
     # is this not moot? it'll be handled by whatever access keygiven to the  client; no? @see clients/minio.py
+
 
 @app.get("/workspaces/{workspace_id}/download/{path:path}")
 async def download_file(workspace_id: str, path: str):

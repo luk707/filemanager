@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
-import { uploadFileToWorkspace } from "~/api/upload";
+import { uploadFileToWorkspace } from "~/api/files";
 
 export function useFileUpload(workspaceId: string) {
   const navigate = useNavigate();
