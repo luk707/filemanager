@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from minio.error import S3Error
 from models.file import File
 from rich import print
+from itertools import islice
 
 app = FastAPI()
 
@@ -157,26 +158,26 @@ async def create_directory(workspace_id: str, directory_path: str):
   )
   return {"message": f"CREATED {directory_path} in {workspace_id}"}
 
-
 @app.delete("/workspaces/{workspace_id}/directory/{directory_path}")
 async def delete_directory(workspace_id: str, directory_path: str):
 
     try:
-      try:
-          objects = list(client.list_objects(workspace_id, prefix=directory_path + "/"))[:2] # check if there is more than one object in this path
-
-      except IndexError:
-        # if only one object is found, it is the directory itself
-          client.remove_object(workspace_id, directory_path + "/")
-          return {"message": f"DELETED {directory_path} in {workspace_id}"}
-          
-      # if more than one object is found, delete all objects in this path
-      for obj in client.list_objects(workspace_id, prefix=directory_path + "/", recursive=True): # recursive=True to remove ALL objects in this path
+      objects = list(islice((client.list_objects(workspace_id, prefix=directory_path + "/")), 1))
+      if objects[0].object_name == directory_path + "/":
+        client.remove_object(workspace_id, directory_path + "/") 
+        return {"message": f"DELETED {directory_path} in {workspace_id}"}
+      else:
+        for obj in client.list_objects(workspace_id, prefix=directory_path + "/", recursive=True): # recursive=True to remove ALL objects in this path
           client.remove_object(workspace_id, obj.object_name)
-      return {"message": f"DELETED {directory_path} from {workspace_id}"}
+        return {"message": f"DELETED {directory_path} from {workspace_id}"}
         
     except S3Error:
       raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id}",
+            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id} by S3",
+        )
+    except IndexError:
+      raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id} by indexing",
         )
