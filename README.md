@@ -1,53 +1,57 @@
 # filemanager
 
-## Setting up the local development stack
+## Development
 
-###
+### Prerequisites
 
-### Ubuntu/Linux Mint/WSL(Ubuntu)
+This application depends on a minio instance. A docker compose manifest is provided to simplify your local configuration for development.
 
-#### MinIO
-##### docker
+Ensure you have [docker installed](#installing-docker-and-docker-compose), and run the following:
+
+`docker-compose up`
+
+### Backend
+
+`fastapi dev main.py`
+
+### Frontend
+
+The frontend can be run simply by running `npm run dev` in the `client` directory of the repo.
+
+Dependencies can be installed using `npm install` to fetch new dependencies and `npm install <NAME_OF_DEP>` to add a new dependency.
+
+## Tips
+
+### Installing node and npm
+
+### Installing docker and docker compose
+
+#### macOS
+
+Take a look at [Orb Stack](https://orbstack.dev/), it provides docker & docker compose out of the box.
+
+#### Ubuntu/Linux Mint/WSL(Ubuntu)
+
 Confirm docker is installed
 
-```docker --version```
+`docker --version`
 
 If not;
 
-```sudo apt install docker.io```
+`sudo apt install docker.io`
 
-##### docker-compose
 Confirm docker-compose is installed;
 
-```docker-compose --version```
+`docker-compose --version`
 
 If not;
 
-```sudo apt install docker-compose```
+`sudo apt install docker-compose`
 
 <br />
 
 **Ensure your user is in the docker group;**
 
-```sudo usermod -dG docker $USER```
+`sudo usermod -dG docker $USER`
 
 **Restart your shell to save change.**
-
-
-When docker, and docker-compose, are installed
-
-##### Start MinIO
-
-```docker-compose up```
-
-#### FastAPI
-
-```fastapi dev main.py```
-
-
-<br />
-
-### MacOS
-
-(According to Luke...) simply run `docker compose up` to run the required services locally
-
