@@ -105,33 +105,22 @@ async def download_file(workspace_id: str, path: str):
 
 
 @app.post("/workspaces/{workspace_id}/upload/{directory_path}")
-async def upload_file(workspace_id: str, files: list[UploadFile],directory_path:str):
-    # TODO: Replace this with the logic to upload a file to the given workspace
-    # There may be multiple files in this so you will need to handle all of them
-    # -- for a later date --
-    for file in files:
-        path = directory_path + '/' + file.filename if directory_path else file.filename
-        # TODO: Perform the upload logic
-
-        file_stream = io.BytesIO(await file.read())
-        client.put_object(
-            workspace_id,
-            path,
-            file_stream,
-            length=file.size,
-            content_type=file.content_type,
-        )
-
-        # HINT: You can test this logic by using the frontend and uploading a
-        #       file, it is already wired up to this endpoint meaning you can
-        #       use the UI to test it, the /docs url on the api also provides a
-        #       way to test this logic.
-
-        # TODO: Check user has write permission for workspace
-        # see @stat()
-
-        print(file)
-    pass
+async def upload_file(workspace_id: str, files: list[UploadFile], directory_path: Optional[str] = ""):
+  # Loop through each file in the list of files
+  for file in files:
+    path = os.path.join(directory_path, file.filename) if directory_path else file.filename
+    
+    file_stream = io.BytesIO(await file.read())
+    
+    client.put_object(
+      workspace_id,
+      path,
+      file_stream,
+      length=file.size,
+      content_type=file.content_type,
+    )
+    
+    print(file) # should this be moved into logging?
 
 
 # delete file
