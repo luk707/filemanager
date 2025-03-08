@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { handleFileUpload } = useFileUpload("files");
 
   return (
-    <Sidebar className="border-r-0" {...props}>
+    <Sidebar variant="inset" className="border-r-0" {...props}>
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={data.workspaces} />
         <div>
@@ -134,7 +134,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
         <NavMain items={data.navMain} />
       </SidebarHeader>
-      <SidebarRail />
     </Sidebar>
   );
 }
