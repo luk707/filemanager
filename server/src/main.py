@@ -1,17 +1,17 @@
 import io
-import os
-from typing import Optional
-import time
 import logging
+import os
+import time
+from typing import Optional
 
+import humanize
 from clients.minio import client
-from fastapi import FastAPI, HTTPException, Response, UploadFile, status, Request
+from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
 from models.file import File
 from rich import print
-from itertools import islice
-import humanize
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")
@@ -167,37 +167,39 @@ async def delete_file(workspace_id: str, path: str):
 
 @app.post("/workspaces/{workspace_id}/directory/{directory_path}")
 async def create_directory(workspace_id: str, directory_path: str):
-  empty_data = bytes()
-  data_stream = io.BytesIO(empty_data)
-  client.put_object(
-    workspace_id,
-    directory_path+"/",
-    data=data_stream,
-    length=0,
-    content_type="application/octet-stream"
-  )
-  return {"message": f"CREATED {directory_path} in {workspace_id}"}
+    empty_data = bytes()
+    data_stream = io.BytesIO(empty_data)
+    client.put_object(
+        workspace_id,
+        directory_path + "/",
+        data=data_stream,
+        length=0,
+        content_type="application/octet-stream",
+    )
+    return {"message": f"CREATED {directory_path} in {workspace_id}"}
 
-@app.delete("/workspaces/{workspace_id}/directory/{directory_path}")
+
+@app.delete(
+    "/workspaces/{workspace_id}/directory/{directory_path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
 async def delete_directory(workspace_id: str, directory_path: str):
+    errors_list: list[str] = []
+    del_list: list[str] = []
 
-    try:
-      objects = list(islice((client.list_objects(workspace_id, prefix=directory_path + "/")), 1))
-      if objects[0].object_name == directory_path + "/":
-        client.remove_object(workspace_id, directory_path + "/") 
-        return {"message": f"DELETED {directory_path} in {workspace_id}"}
-      else:
-        for obj in client.list_objects(workspace_id, prefix=directory_path + "/", recursive=True): # recursive=True to remove ALL objects in this path
-          client.remove_object(workspace_id, obj.object_name)
-        return {"message": f"DELETED {directory_path} from {workspace_id}"}
-        
-    except S3Error:
-      raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id} by S3",
+    objects = list((client.list_objects(workspace_id, prefix=directory_path + "/")))
+
+    for i in objects:
+        del_list.append(DeleteObject(i.object_name))
+    errors = client.remove_objects(
+        workspace_id,
+        del_list,
+    )
+
+    for error in errors:
+        errors_list = errors_list.append(
+            f"{error} deleted {len(errors)} / {len(del_list)}"
         )
-    except IndexError:
-      raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id} by indexing",
-        )
+
+    if errors_list != []:
+        return errors_list
