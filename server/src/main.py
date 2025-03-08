@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from minio.error import S3Error
 from models.file import File
 from rich import print
+from itertools import islice
 import humanize
 
 app = FastAPI()
@@ -49,12 +50,6 @@ async def root():
 @app.get("/workspaces/{workspace_id}/stat")
 @app.get("/workspaces/{workspace_id}/stat/{path:path}")
 async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
-    # TODO: Check if the path is a file or a directory, or root (i.e. path = "")
-    # 1. if path is a file, we should provide information on the specific file
-    #    by returning a single File
-
-    # 2. if the path is a directory or root, we should instead return a
-    #    directory listing for the client to display, i.e. a list[File]
 
     if path:
         try:
@@ -80,10 +75,10 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
             )
 
     try:
-        return [
-            File.from_minio_object(obj)
-            for obj in client.list_objects(workspace_id, prefix=path)
-        ]
+        objects = list(client.list_objects(workspace_id, prefix=path))
+        directories = [File.from_minio_object(obj) for obj in objects if obj.is_dir]
+        files = [File.from_minio_object(obj) for obj in objects if not obj.is_dir]
+        return directories + files
     except S3Error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -128,35 +123,24 @@ async def download_file(workspace_id: str, path: str):
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
 
-
 @app.post("/workspaces/{workspace_id}/upload")
-async def upload_file(workspace_id: str, files: list[UploadFile]):
-    # TODO: Replace this with the logic to upload a file to the given workspace
-    # There may be multiple files in this so you will need to handle all of them
-    # -- for a later date --
-
-    for file in files:
-        # TODO: Perform the upload logic
-
-        file_stream = io.BytesIO(await file.read())
-        client.put_object(
-            workspace_id,
-            file.filename,
-            file_stream,
-            length=file.size,
-            content_type=file.content_type,
-        )
-
-        # HINT: You can test this logic by using the frontend and uploading a
-        #       file, it is already wired up to this endpoint meaning you can
-        #       use the UI to test it, the /docs url on the api also provides a
-        #       way to test this logic.
-
-        # TODO: Check user has write permission for workspace
-        # see @stat()
-
-        print(file)
-    pass
+@app.post("/workspaces/{workspace_id}/upload/{directory_path:path}")
+async def upload_file(workspace_id: str, files: list[UploadFile], directory_path: Optional[str] = ""):
+  # Loop through each file in the list of files
+  for file in files:
+    path = os.path.join(directory_path, file.filename) if directory_path else file.filename
+    
+    file_stream = io.BytesIO(await file.read())
+    
+    client.put_object(
+      workspace_id,
+      path,
+      file_stream,
+      length=file.size,
+      content_type=file.content_type,
+    )
+    
+    print(file) # should this be moved into logging?
 
 
 # delete file
@@ -179,3 +163,41 @@ async def delete_file(workspace_id: str, path: str):
     # -- for a later date --
     # TODO: Check user has write permission for workspace
     # see @stat()
+
+
+@app.post("/workspaces/{workspace_id}/directory/{directory_path}")
+async def create_directory(workspace_id: str, directory_path: str):
+  empty_data = bytes()
+  data_stream = io.BytesIO(empty_data)
+  client.put_object(
+    workspace_id,
+    directory_path+"/",
+    data=data_stream,
+    length=0,
+    content_type="application/octet-stream"
+  )
+  return {"message": f"CREATED {directory_path} in {workspace_id}"}
+
+@app.delete("/workspaces/{workspace_id}/directory/{directory_path}")
+async def delete_directory(workspace_id: str, directory_path: str):
+
+    try:
+      objects = list(islice((client.list_objects(workspace_id, prefix=directory_path + "/")), 1))
+      if objects[0].object_name == directory_path + "/":
+        client.remove_object(workspace_id, directory_path + "/") 
+        return {"message": f"DELETED {directory_path} in {workspace_id}"}
+      else:
+        for obj in client.list_objects(workspace_id, prefix=directory_path + "/", recursive=True): # recursive=True to remove ALL objects in this path
+          client.remove_object(workspace_id, obj.object_name)
+        return {"message": f"DELETED {directory_path} from {workspace_id}"}
+        
+    except S3Error:
+      raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id} by S3",
+        )
+    except IndexError:
+      raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"404_NOT_FOUND: dir {directory_path} not found in {workspace_id} by indexing",
+        )
