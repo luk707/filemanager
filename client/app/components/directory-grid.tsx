@@ -1,6 +1,5 @@
-import { downloadFile, removeFile, DirectorySchema } from "~/api/files";
+import { DirectorySchema, removeDirectory } from "~/api/files";
 import { z } from "zod";
-import { FileIcon } from "~/components/file-icon";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,7 +12,7 @@ import {
   ContextMenuSeparator,
 } from "~/components/ui/context-menu";
 import {
-  Download,
+  FileArchive,
   Files,
   Folder,
   FolderInput,
@@ -67,24 +66,14 @@ export function DirectoryGrid({ directories }: DirectoryGridProps) {
               </Link>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-64">
-              <ContextMenuItem
-                onClick={async () => {
-                  // TODO: Remove hardcoded workspaceId
-                  await downloadFile("files", directory.name);
-                }}
-              >
-                <Download />
-                Download
+              <ContextMenuItem>
+                <FileArchive />
+                Download archive
               </ContextMenuItem>
               <ContextMenuItem>
                 <PencilLine />
                 Rename
                 <ContextMenuShortcut>⌥⌘E</ContextMenuShortcut>
-              </ContextMenuItem>
-              <ContextMenuItem>
-                <Files />
-                Make a copy
-                <ContextMenuShortcut>⌘R</ContextMenuShortcut>
               </ContextMenuItem>
               <ContextMenuSeparator />
               <ContextMenuSub>
@@ -110,7 +99,7 @@ export function DirectoryGrid({ directories }: DirectoryGridProps) {
                 }}
               >
                 <Info />
-                File details
+                Details
                 <ContextMenuShortcut>
                   ⌥V <span className="tracking-normal">then</span> D
                 </ContextMenuShortcut>
@@ -119,7 +108,7 @@ export function DirectoryGrid({ directories }: DirectoryGridProps) {
               <AlertDialogTrigger asChild>
                 <ContextMenuItem>
                   <Trash2 />
-                  Remove file
+                  Remove folder
                   <ContextMenuShortcut>
                     <span className="tracking-normal">Delete</span>
                   </ContextMenuShortcut>
@@ -134,7 +123,7 @@ export function DirectoryGrid({ directories }: DirectoryGridProps) {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete "
-                {directory.name}".
+                {directory.name}" and its contents.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -142,7 +131,7 @@ export function DirectoryGrid({ directories }: DirectoryGridProps) {
               <AlertDialogActionDestructive
                 onClick={async () => {
                   // TODO: Remove hardcoded workspaceId
-                  await removeFile("files", directory.name);
+                  await removeDirectory("files", directory.name);
                   navigate(".", { replace: true });
                 }}
               >

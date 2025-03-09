@@ -103,7 +103,7 @@ export function FileGrid({ files }: FileGridProps) {
                 }}
               >
                 <Info />
-                File details
+                Details
                 <ContextMenuShortcut>
                   ⌥V <span className="tracking-normal">then</span> D
                 </ContextMenuShortcut>

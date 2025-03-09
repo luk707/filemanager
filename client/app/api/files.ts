@@ -42,6 +42,10 @@ const urls = {
     `${
       import.meta.env.VITE_API_BASE_URL
     }/workspaces/${workspaceId}/directory/${path}`,
+  removeDirectory: (workspaceId: string, path: string) =>
+    `${
+      import.meta.env.VITE_API_BASE_URL
+    }/workspaces/${workspaceId}/directory/${path}`,
 };
 
 export async function stat(workspaceId: string, path?: string) {
@@ -58,6 +62,16 @@ export async function stat(workspaceId: string, path?: string) {
 
 export async function removeFile(workspaceId: string, path: string) {
   const response = await fetch(urls.removeFile(workspaceId, path), {
+    method: "delete",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete ${path}: ${response.statusText}`);
+  }
+}
+
+export async function removeDirectory(workspaceId: string, path: string) {
+  const response = await fetch(urls.removeDirectory(workspaceId, path), {
     method: "delete",
   });
 
