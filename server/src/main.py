@@ -1,16 +1,16 @@
 import io
-import os
-from typing import Optional
-import time
 import logging
+import os
+import time
+from typing import Optional
 
+import humanize
 from clients.minio import client
-from fastapi import FastAPI, HTTPException, Response, UploadFile, status, Request
+from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
 from models.file import File
-from rich import print
-import humanize
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")
@@ -49,13 +49,6 @@ async def root():
 @app.get("/workspaces/{workspace_id}/stat")
 @app.get("/workspaces/{workspace_id}/stat/{path:path}")
 async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
-    # TODO: Check if the path is a file or a directory, or root (i.e. path = "")
-    # 1. if path is a file, we should provide information on the specific file
-    #    by returning a single File
-
-    # 2. if the path is a directory or root, we should instead return a
-    #    directory listing for the client to display, i.e. a list[File]
-
     if path:
         try:
             response = [
@@ -80,10 +73,8 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
             )
 
     try:
-        return [
-            File.from_minio_object(obj)
-            for obj in client.list_objects(workspace_id, prefix=path)
-        ]
+        objects = list(client.list_objects(workspace_id, prefix=path))
+        return [File.from_minio_object(obj) for obj in objects]
     except S3Error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -130,33 +121,27 @@ async def download_file(workspace_id: str, path: str):
 
 
 @app.post("/workspaces/{workspace_id}/upload")
-async def upload_file(workspace_id: str, files: list[UploadFile]):
-    # TODO: Replace this with the logic to upload a file to the given workspace
-    # There may be multiple files in this so you will need to handle all of them
-    # -- for a later date --
-
+@app.post("/workspaces/{workspace_id}/upload/{path:path}")
+async def upload_file(
+    workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
+):
+    # Loop through each file in the list of files
     for file in files:
-        # TODO: Perform the upload logic
+        path = os.path.join(path, file.filename) if path else file.filename
 
         file_stream = io.BytesIO(await file.read())
+
         client.put_object(
             workspace_id,
-            file.filename,
+            path,
             file_stream,
             length=file.size,
             content_type=file.content_type,
         )
 
-        # HINT: You can test this logic by using the frontend and uploading a
-        #       file, it is already wired up to this endpoint meaning you can
-        #       use the UI to test it, the /docs url on the api also provides a
-        #       way to test this logic.
-
-        # TODO: Check user has write permission for workspace
-        # see @stat()
-
-        print(file)
-    pass
+        logging.info(
+            f"UPLOADED {file.filename} ({humanize.naturalsize(file.size)}) to {workspace_id}/{path}"
+        )
 
 
 # delete file
@@ -179,3 +164,48 @@ async def delete_file(workspace_id: str, path: str):
     # -- for a later date --
     # TODO: Check user has write permission for workspace
     # see @stat()
+
+
+@app.post("/workspaces/{workspace_id}/directory/{path:path}")
+async def create_directory(workspace_id: str, path: str):
+    empty_data = bytes()
+    data_stream = io.BytesIO(empty_data)
+    client.put_object(
+        workspace_id,
+        path + "/",
+        data=data_stream,
+        length=0,
+    )
+    return {"message": f"CREATED {path} in {workspace_id}"}
+
+
+@app.delete(
+    "/workspaces/{workspace_id}/directory/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_directory(workspace_id: str, path: str):
+    errors_count: int = 0
+
+    objects = list((client.list_objects(workspace_id, prefix=path + "/")))
+
+    errors = client.remove_objects(
+        workspace_id,
+        [DeleteObject(object.object_name) for object in objects],
+    )
+
+    logger.info(f"Added {len(objects)} objects to be removed")
+
+    for error in errors:
+        errors_count += 1
+        logger.warning(
+            f"Failed to delete object '{error.name}' with error code '{error.code}'."
+        )
+
+    if errors_count != 0:
+        logger.warning(
+            f"FAILED to delete {errors_count} object(s) from {path} in {workspace_id}"
+        )
+
+    logger.info(
+        f"DELETED {len(objects) - errors_count} of {len(objects)} object(s) from {path} in {workspace_id}."
+    )
