@@ -49,7 +49,6 @@ async def root():
 @app.get("/workspaces/{workspace_id}/stat")
 @app.get("/workspaces/{workspace_id}/stat/{path:path}")
 async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
-
     if path:
         try:
             response = [
@@ -186,19 +185,15 @@ async def create_directory(workspace_id: str, path: str):
 )
 async def delete_directory(workspace_id: str, path: str):
     errors_count: int = 0
-    del_list: list[str] = []
 
     objects = list((client.list_objects(workspace_id, prefix=path + "/")))
 
-    for i in objects:
-        logger.debug(f"Adding {i.object_name} to delete list")
-        del_list.append(DeleteObject(i.object_name))
     errors = client.remove_objects(
         workspace_id,
-        del_list,
+        [DeleteObject(object.object_name) for object in objects],
     )
 
-    logger.info(f"Added {len(del_list)} objects to be removed")
+    logger.info(f"Added {len(objects)} objects to be removed")
 
     for error in errors:
         errors_count += 1
@@ -212,5 +207,5 @@ async def delete_directory(workspace_id: str, path: str):
         )
 
     logger.info(
-        f"DELETED {len(del_list) - errors_count} of {len(del_list)} object(s) from {path} in {workspace_id}."
+        f"DELETED {len(objects) - errors_count} of {len(objects)} object(s) from {path} in {workspace_id}."
     )
