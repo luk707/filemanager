@@ -75,9 +75,7 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
 
     try:
         objects = list(client.list_objects(workspace_id, prefix=path))
-        directories = [File.from_minio_object(obj) for obj in objects if obj.is_dir]
-        files = [File.from_minio_object(obj) for obj in objects if not obj.is_dir]
-        return directories + files
+        return [File.from_minio_object(obj) for obj in objects]
     except S3Error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -179,7 +177,6 @@ async def create_directory(workspace_id: str, directory_path: str):
         directory_path + "/",
         data=data_stream,
         length=0,
-        content_type="application/octet-stream",
     )
     return {"message": f"CREATED {directory_path} in {workspace_id}"}
 
