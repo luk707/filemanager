@@ -66,24 +66,6 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     Raises:
       HTTPException: If the specified path is not found in the workspace.
     """
-    if path:
-        try:
-            response = [
-                File.from_minio_object(obj)
-                for obj in client.list_objects(workspace_id)
-                if obj.object_name == path
-            ]
-            if not response:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-                )
-            return response
-        except S3Error:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-            )
 
     try:
         objects = list(client.list_objects(workspace_id, prefix=path))
