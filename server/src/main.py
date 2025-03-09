@@ -213,5 +213,5 @@ async def delete_directory(workspace_id: str, directory_path: str):
         )
 
     logger.info(
-        f"DELETED {len(del_list) - errors_count} object(s) from {directory_path} in {workspace_id}. Tried to delete {len(del_list)} object(s)."
+        f"DELETED {len(del_list) - errors_count} of {len(del_list)} object(s) from {directory_path} in {workspace_id}."
     )
