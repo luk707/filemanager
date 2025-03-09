@@ -37,7 +37,7 @@ async def add_process_time_header(request: Request, call_next):
         request (Request): params for the endpoint
 
     Returns:
-        response (the relavant endpoint's response)
+        response (the relavant endpoint's response time in ms)
     """
     start_time = time.perf_counter()
     response = await call_next(request)
@@ -50,8 +50,17 @@ async def add_process_time_header(request: Request, call_next):
     )
     return response
 
-@app.get("/workspaces/{workspace_id}/stat")
-@app.get("/workspaces/{workspace_id}/stat/{path:path}")
+
+@app.get(
+    "/workspaces/{workspace_id}/stat",
+    summary="List workspace root",
+    description="Returns a list of files and directories in the root of the workspace.",
+)
+@app.get(
+    "/workspaces/{workspace_id}/stat/{path:path}",
+    summary="List directory",
+    description="Returns a list of files and directories in the specified directory.",
+)
 async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     """
     Asynchronously retrieves the status of files in a specified workspace.
@@ -85,7 +94,12 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
 
     # TODO: Check user has read permission for workspace
 
-@app.get("/workspaces/{workspace_id}/download/{path:path}")
+
+@app.get(
+    "/workspaces/{workspace_id}/download/{path:path}",
+    summary="Download file",
+    description="Downloads the specified file from the specified workspace.",
+)
 async def download_file(workspace_id: str, path: str):
     """
     Asynchronously downloads a file from a specified workspace.
@@ -108,10 +122,8 @@ async def download_file(workspace_id: str, path: str):
     try:
         file_object = client.stat_object(workspace_id, path)
         response = client.get_object(workspace_id, path)
-        file_content = b"".join(
-            chunk for chunk in response.stream()
-        )  # retrieves all chunks and combines them.
-        filename = os.path.basename(path)  # gets the filename from the path.
+        file_content = b"".join(chunk for chunk in response.stream())
+        filename = os.path.basename(path)
 
         return Response(
             content=file_content,
@@ -125,8 +137,16 @@ async def download_file(workspace_id: str, path: str):
         )
 
 
-@app.post("/workspaces/{workspace_id}/upload")
-@app.post("/workspaces/{workspace_id}/upload/{path:path}")
+@app.post(
+    "/workspaces/{workspace_id}/upload",
+    summary="",
+    description="",
+)
+@app.post(
+    "/workspaces/{workspace_id}/upload/{path:path}",
+    summary="Upload a file",
+    description="Upload a file (BLOB) to the specified workspace and path.",
+)
 async def upload_file(
     workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
 ):
@@ -159,43 +179,11 @@ async def upload_file(
         )
 
 
-@app.delete(
-    "/workspaces/{workspace_id}/remove/{path:path}",
-    status_code=status.HTTP_204_NO_CONTENT,
+@app.post(
+    "/workspaces/{workspace_id}/directory/{path:path}",
+    summary="Create a directory",
+    description="Creates a directory in the specified workspace.",
 )
-async def delete_file(workspace_id: str, path: str):
-    """
-    Asynchronously deletes a file from a workspace.
-
-    Args:
-      workspace_id (str): The ID of the workspace containing the file.
-      path (str): The path of the file within the workspace.
-
-    Raises:
-      HTTPException: If the file is not found in the specified workspace.
-
-    Logs:
-      Info: Logs the path of the file deleted from the specified workspace.
-    """
-    try:
-        # Check if the file exists
-        client.stat_object(workspace_id, path)
-    except S3Error:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-        )
-
-    # Perform the deletion
-    client.remove_object(workspace_id, path)
-    logger.info(f"DELETED {path} from {workspace_id}")
-
-    # -- for a later date --
-    # TODO: Check user has write permission for workspace
-    # see @stat()
-
-
-@app.post("/workspaces/{workspace_id}/directory/{path:path}")
 async def create_directory(workspace_id: str, path: str):
     """
     Asynchronously creates a directory in the specified workspace.
@@ -221,10 +209,12 @@ async def create_directory(workspace_id: str, path: str):
 @app.delete(
     "/workspaces/{workspace_id}/directory/{path:path}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete directory",
+    description="DESTRUCTIVE ACTION - Remove a directory and all of its contents - DESTRUCTIVE ACTION",
 )
 async def delete_directory(workspace_id: str, path: str):
     """
-    Asynchronously deletes an object from a workspace
+    Asynchronously deletes a directory and all contents within it from a workspace.
 
     Args:
       workspace_id (str): The ID of the workspace containing the source file.
@@ -260,9 +250,49 @@ async def delete_directory(workspace_id: str, path: str):
     )
 
 
+@app.delete(
+    "/workspaces/{workspace_id}/remove/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a file",
+    description="DESTRUCTIVE ACTION - Deletes the specified file, in the specified workspace - DESTRUCTIVE ACTION",
+)
+async def delete_file(workspace_id: str, path: str):
+    """
+    Asynchronously deletes a file from a workspace.
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the file.
+      path (str): The path of the file within the workspace.
+
+    Raises:
+      HTTPException: If the file is not found in the specified workspace.
+
+    Logs:
+      Info: Logs the path of the file deleted from the specified workspace.
+    """
+    try:
+        # Check if the file exists
+        client.stat_object(workspace_id, path)
+    except S3Error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
+        )
+
+    # Perform the deletion
+    client.remove_object(workspace_id, path)
+    logger.info(f"DELETED {path} from {workspace_id}")
+
+    # -- for a later date --
+    # TODO: Check user has write permission for workspace
+    # see @stat()
+
+
 @app.put(
     "/workspaces/{workspace_id}/cp/{path:path}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Copy a file",
+    description="Copies a file from to another path, in the specified workspace.",
 )
 async def copy_file(
     workspace_id: str,
@@ -271,7 +301,7 @@ async def copy_file(
     target_workspace_id: Optional[str] = None,
 ):
     """
-    Asynchronously copies a file from one workspace to another.
+    Asynchronously copies a file from one location to another within the same workspace, or to another workspace.
 
     Args:
       workspace_id (str): The ID of the workspace containing the source file.
@@ -305,6 +335,8 @@ async def copy_file(
 @app.put(
     "/workspaces/{workspace_id}/mv/{path:path}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Move file",
+    description="Move a file to another path, in the specified workspace.",
 )
 async def move_file(
     workspace_id: str,
