@@ -8,6 +8,7 @@ import humanize
 from clients.minio import client
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from minio.commonconfig import CopySource
 from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
 from models.file import File
@@ -208,4 +209,46 @@ async def delete_directory(workspace_id: str, path: str):
 
     logger.info(
         f"DELETED {len(objects) - errors_count} of {len(objects)} object(s) from {path} in {workspace_id}."
+    )
+
+
+@app.put(
+    "/workspaces/{workspace_id}/cp/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def copy_file(
+    workspace_id: str,
+    path: str,
+    target_path: str,
+    target_workspace_id: Optional[str] = None,
+):
+    """
+    Asynchronously copies a file from one workspace to another.
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the source file.
+      path (str): The path of the source file within the workspace.
+      target_path (str): The path where the file should be copied to in the target workspace.
+      target_workspace_id (Optional[str], optional): The ID of the target workspace. If not provided, defaults to the source workspace ID.
+
+    Raises:
+      HTTPException: If the source file is not found in the specified workspace.
+
+    Logs:
+      Info: Logs the source and target paths along with their respective workspace IDs after a successful copy operation.
+    """
+    target_workspace_id = (
+        workspace_id if target_workspace_id is None else target_workspace_id
+    )
+    try:
+        source = CopySource(workspace_id, path)
+        client.copy_object(target_workspace_id, target_path, source)
+
+    except S3Error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
+        )
+    logger.info(
+        f"Copied {path} in {workspace_id} TO {target_path} in {target_workspace_id}"
     )
