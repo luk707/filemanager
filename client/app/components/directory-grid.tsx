@@ -1,4 +1,4 @@
-import { downloadFile, removeFile, FileSchema } from "~/api/files";
+import { downloadFile, removeFile, DirectorySchema } from "~/api/files";
 import { z } from "zod";
 import { FileIcon } from "~/components/file-icon";
 import {
@@ -15,6 +15,7 @@ import {
 import {
   Download,
   Files,
+  Folder,
   FolderInput,
   FolderOpen,
   Info,
@@ -22,7 +23,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   AlertDialog,
   AlertDialogActionDestructive,
@@ -36,34 +37,40 @@ import {
 } from "~/components/ui/alert-dialog";
 import { useInspector } from "~/hooks/use-inspector";
 
-export interface FileGridProps {
-  files: z.infer<typeof FileSchema>[];
+export interface DirectoryGridProps {
+  directories: z.infer<typeof DirectorySchema>[];
 }
 
-export function FileGrid({ files }: FileGridProps) {
+export function DirectoryGrid({ directories }: DirectoryGridProps) {
   const { open: openInspector } = useInspector();
   const navigate = useNavigate();
   return (
-    <ul className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-      {files.map((file) => (
-        <AlertDialog key={file.name}>
+    <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+      {directories.map((directory) => (
+        <AlertDialog key={directory.name}>
           <ContextMenu>
             <ContextMenuTrigger asChild>
-              <li className="bg-muted/50 hover:bg-muted rounded-lg p-2 border">
-                <div className="flex gap-2 p-2">
-                  <FileIcon contentType={file.contentType} />
+              <Link
+                to={`/files/${directory.path}`}
+                className="bg-muted/50 hover:bg-muted rounded-lg p-2 border"
+              >
+                <div className="flex items-center gap-2 p-2">
+                  <Folder
+                    size={20}
+                    className="text-muted-foreground"
+                    fill="currentColor"
+                  />
                   <span className="overflow-ellipsis overflow-hidden whitespace-nowrap select-none">
-                    {file.basename}
+                    {directory.name}
                   </span>
                 </div>
-                <div className="aspect-[4/3] bg-white rounded-md" />
-              </li>
+              </Link>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-64">
               <ContextMenuItem
                 onClick={async () => {
                   // TODO: Remove hardcoded workspaceId
-                  await downloadFile("files", file.name);
+                  await downloadFile("files", directory.name);
                 }}
               >
                 <Download />
@@ -123,11 +130,11 @@ export function FileGrid({ files }: FileGridProps) {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                Are you sure you want to delete "{file.name}"?
+                Are you sure you want to delete "{directory.name}"?
               </AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete "
-                {file.name}".
+                {directory.name}".
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -135,7 +142,7 @@ export function FileGrid({ files }: FileGridProps) {
               <AlertDialogActionDestructive
                 onClick={async () => {
                   // TODO: Remove hardcoded workspaceId
-                  await removeFile("files", file.name);
+                  await removeFile("files", directory.name);
                   navigate(".", { replace: true });
                 }}
               >
@@ -145,6 +152,6 @@ export function FileGrid({ files }: FileGridProps) {
           </AlertDialogContent>
         </AlertDialog>
       ))}
-    </ul>
+    </div>
   );
 }

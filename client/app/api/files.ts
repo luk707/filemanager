@@ -1,11 +1,25 @@
 import { z } from "zod";
 
 export const FileSchema = z.object({
+  type: z.literal("file"),
   name: z.string(),
+  basename: z.string(),
+  path: z.string(),
   contentType: z.string(),
   size: z.number(),
   lastModified: z.string(),
 });
+
+export const DirectorySchema = z.object({
+  type: z.literal("directory"),
+  name: z.string(),
+  path: z.string(),
+});
+
+export const DirectoryListingSchema = z.discriminatedUnion("type", [
+  FileSchema,
+  DirectorySchema,
+]);
 
 const urls = {
   getFiles: (workspaceId: string, path?: string) =>
@@ -24,9 +38,13 @@ const urls = {
     }/workspaces/${workspaceId}/download/${path}`,
   uploadFile: (workspaceId: string) =>
     `${import.meta.env.VITE_API_BASE_URL}/workspaces/${workspaceId}/upload`,
+  createDirectory: (workspaceId: string, path: string) =>
+    `${
+      import.meta.env.VITE_API_BASE_URL
+    }/workspaces/${workspaceId}/directory/${path}`,
 };
 
-export async function getFiles(workspaceId: string, path?: string) {
+export async function stat(workspaceId: string, path?: string) {
   const response = await fetch(urls.getFiles(workspaceId, path));
 
   if (!response.ok) {
@@ -35,7 +53,7 @@ export async function getFiles(workspaceId: string, path?: string) {
 
   const data = await response.json();
 
-  return z.array(FileSchema).parse(data);
+  return z.array(DirectoryListingSchema).parse(data);
 }
 
 export async function removeFile(workspaceId: string, path: string) {
@@ -79,5 +97,17 @@ export async function uploadFileToWorkspace(file: File, workspaceId: string) {
     console.log("File uploaded successfully!");
   } catch (error) {
     console.error("Error uploading file:", error);
+  }
+}
+
+export async function createDirectory(workspaceId: string, path: string) {
+  const response = await fetch(urls.createDirectory(workspaceId, path), {
+    method: "post",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to create directory ${path}: ${response.statusText}`
+    );
   }
 }

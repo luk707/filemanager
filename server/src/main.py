@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from minio.commonconfig import CopySource
 from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
-from models.file import File
+from models.file import DirectoryListing, directory_listing_from_object
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")
@@ -61,7 +61,7 @@ async def add_process_time_header(request: Request, call_next):
     summary="List directory",
     description="Returns a list of files and directories in the specified directory.",
 )
-async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
+async def stat(workspace_id: str, path: Optional[str] = None) -> list[DirectoryListing]:
     """
     Asynchronously retrieves the status of files in a specified workspace.
 
@@ -77,8 +77,16 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     """
 
     try:
-        objects = list(client.list_objects(workspace_id, prefix=path))
-        return [File.from_minio_object(obj) for obj in objects]
+        objects = list(
+            client.list_objects(
+                workspace_id, prefix=f"{path}/" if path is not None else None
+            )
+        )
+        return [
+            directory_listing_from_object(obj)
+            for obj in objects
+            if obj.object_name != f"{path}/"
+        ]
     except S3Error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
