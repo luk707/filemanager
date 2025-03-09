@@ -30,6 +30,15 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
+    """Logs endpoint processing time
+
+    Args:
+        call_next: the endpoint to be called
+        request (Request): params for the endpoint
+
+    Returns:
+        response (the relavant endpoint's response)
+    """
     start_time = time.perf_counter()
     response = await call_next(request)
     process_time = time.perf_counter() - start_time
@@ -41,37 +50,22 @@ async def add_process_time_header(request: Request, call_next):
     )
     return response
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
 @app.get("/workspaces/{workspace_id}/stat")
 @app.get("/workspaces/{workspace_id}/stat/{path:path}")
 async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
-    if path:
-        try:
-            response = [
-                File.from_minio_object(obj)
-                for obj in client.list_objects(workspace_id)
-                if obj.object_name == path
-            ]
-            if response == []:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-                )
-            return [
-                File.from_minio_object(obj)
-                for obj in client.list_objects(workspace_id)
-                if obj.object_name == path
-            ]
-        except S3Error:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-            )
+    """
+    Asynchronously retrieves the status of files in a specified workspace.
+
+    Args:
+      workspace_id (str): The ID of the workspace.
+      path (Optional[str], optional): The path within the workspace. Defaults to "".
+
+    Returns:
+      list[File]: A list of File objects representing the files in the workspace.
+
+    Raises:
+      HTTPException: If the specified path is not found in the workspace.
+    """
 
     try:
         objects = list(client.list_objects(workspace_id, prefix=path))
@@ -91,18 +85,28 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
 
     # TODO: Check user has read permission for workspace
 
-    # is this not moot? it'll be handled by whatever access keygiven to the  client; no? @see clients/minio.py
-
-
 @app.get("/workspaces/{workspace_id}/download/{path:path}")
 async def download_file(workspace_id: str, path: str):
+    """
+    Asynchronously downloads a file from a specified workspace.
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the file.
+      path (str): The path of the file within the workspace.
+
+    Returns:
+      Response: A response containing the file content and appropriate headers.
+
+    Raises:
+      HTTPException: If the file is not found in the specified workspace.
+    """
     if not path:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
     try:
-        object = client.stat_object(workspace_id, path)
+        file_object = client.stat_object(workspace_id, path)
         response = client.get_object(workspace_id, path)
         file_content = b"".join(
             chunk for chunk in response.stream()
@@ -111,7 +115,7 @@ async def download_file(workspace_id: str, path: str):
 
         return Response(
             content=file_content,
-            media_type=object.content_type,
+            media_type=file_object.content_type,
             headers={"Content-Disposition": f"attachment; filename={filename}"},
         )
     except S3Error:
@@ -126,41 +130,65 @@ async def download_file(workspace_id: str, path: str):
 async def upload_file(
     workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
 ):
-    # Loop through each file in the list of files
+    """
+    Asynchronously uploads files to a specified workspace.
+
+    Args:
+      workspace_id (str): The ID of the workspace where the files will be uploaded.
+      files (list[UploadFile]): A list of files to be uploaded.
+      path (Optional[str], optional): The path within the workspace where the files will be uploaded. Defaults to "".
+
+    Logs:
+      Info: Logs the filename, size, and upload path for each uploaded file.
+    """
     for file in files:
-        path = os.path.join(path, file.filename) if path else file.filename
+        upload_path = os.path.join(path, file.filename) if path else file.filename
 
         file_stream = io.BytesIO(await file.read())
 
         client.put_object(
             workspace_id,
-            path,
+            upload_path,
             file_stream,
             length=file.size,
             content_type=file.content_type,
         )
 
         logging.info(
-            f"UPLOADED {file.filename} ({humanize.naturalsize(file.size)}) to {workspace_id}/{path}"
+            f"UPLOADED {file.filename} ({humanize.naturalsize(file.size)}) to {workspace_id}/{upload_path}"
         )
 
 
-# delete file
-@app.delete("/workspaces/{workspace_id}/remove/{path:path}")
+@app.delete(
+    "/workspaces/{workspace_id}/remove/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
 async def delete_file(workspace_id: str, path: str):
-    # TODO: Implement logic to delete files from a workspace
-    # 1. check that the file path is a valid path to a file or folder
+    """
+    Asynchronously deletes a file from a workspace.
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the file.
+      path (str): The path of the file within the workspace.
+
+    Raises:
+      HTTPException: If the file is not found in the specified workspace.
+
+    Logs:
+      Info: Logs the path of the file deleted from the specified workspace.
+    """
     try:
+        # Check if the file exists
         client.stat_object(workspace_id, path)
     except S3Error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
-    # 2. perform the deletion logic
 
+    # Perform the deletion
     client.remove_object(workspace_id, path)
-    return {"message": f"DELETED {path} from {workspace_id}"}
+    logger.info(f"DELETED {path} from {workspace_id}")
 
     # -- for a later date --
     # TODO: Check user has write permission for workspace
@@ -169,6 +197,16 @@ async def delete_file(workspace_id: str, path: str):
 
 @app.post("/workspaces/{workspace_id}/directory/{path:path}")
 async def create_directory(workspace_id: str, path: str):
+    """
+    Asynchronously creates a directory in the specified workspace.
+
+    Args:
+      workspace_id (str): The ID of the workspace where the directory will be created.
+      path (str): The path of the directory to be created within the workspace.
+
+    Returns:
+      dict: A message indicating the directory creation status.
+    """
     empty_data = bytes()
     data_stream = io.BytesIO(empty_data)
     client.put_object(
@@ -185,6 +223,16 @@ async def create_directory(workspace_id: str, path: str):
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_directory(workspace_id: str, path: str):
+    """
+    Asynchronously deletes an object from a workspace
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the source file.
+      path (str): The path of the source file within the workspace.
+
+    Logs:
+      Info: Logs the number of objects deleted from the specified workspace, and the total objects to delete
+    """
     errors_count: int = 0
 
     objects = list((client.list_objects(workspace_id, prefix=path + "/")))
@@ -251,4 +299,40 @@ async def copy_file(
         )
     logger.info(
         f"Copied {path} in {workspace_id} TO {target_path} in {target_workspace_id}"
+    )
+
+
+@app.put(
+    "/workspaces/{workspace_id}/mv/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def move_file(
+    workspace_id: str,
+    path: str,
+    target_path: str,
+    target_workspace_id: Optional[str] = None,
+):
+    """
+    Asynchronously moves a file from one workspace to another - by cp then rm
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the source file.
+      path (str): The path of the source file within the workspace.
+      target_path (str): The path where the file should be moved to in the target workspace.
+      target_workspace_id (Optional[str], optional): The ID of the target workspace. If not provided, defaults to the source workspace ID.
+
+    Raises:
+      HTTPException: If the source file is not found in the specified workspace.
+
+    Logs:
+      Info: Logs the source and target paths along with their respective workspace IDs after a successful move operation.
+    """
+    target_workspace_id = (
+        workspace_id if target_workspace_id is None else target_workspace_id
+    )
+
+    await copy_file(workspace_id, path, target_path, target_workspace_id)
+    await delete_file(workspace_id, path)
+    logger.info(
+        f"Moved {path} in {workspace_id} TO {target_path} in {target_workspace_id}"
     )
