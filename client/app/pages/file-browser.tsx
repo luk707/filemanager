@@ -17,7 +17,6 @@ import {
   List,
   User,
 } from "lucide-react";
-import { cn } from "~/lib/utils";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useShell } from "~/layouts/shell";
 import { Button } from "~/components/ui/button";
@@ -34,14 +33,14 @@ export async function clientLoader({}: Route.ClientLoaderArgs) {
 
 export default function FileBrowser({ loaderData }: Route.ComponentProps) {
   const files = loaderData;
-  const { mainViewAtTop } = useShell();
+  const { fixedToTop } = useShell();
+  console.log("RENDER");
+  console.log("mainViewAtTop", fixedToTop);
   return (
     <>
       <header
-        className={cn(
-          "flex h-14 shrink-0 items-center gap-2 top-0 sticky bg-background/70 backdrop-blur-lg border-b transition-colors duration-300",
-          mainViewAtTop && "[&:not(:hover)]:border-transparent"
-        )}
+        data-fixed-to-top={String(fixedToTop)}
+        className="flex h-14 shrink-0 items-center gap-2 top-0 sticky bg-background/70 backdrop-blur-lg border-b transition-colors duration-300 data-[fixed-to-top=true]:border-transparent hover:data-[fixed-to-top=true]:border-border"
       >
         <div className="flex flex-1 items-center gap-2 px-3">
           <SidebarTrigger />

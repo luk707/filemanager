@@ -46,8 +46,8 @@ export function FileGrid({ files }: FileGridProps) {
   return (
     <ul className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
       {files.map((file) => (
-        <AlertDialog>
-          <ContextMenu key={file.name}>
+        <AlertDialog key={file.name}>
+          <ContextMenu>
             <ContextMenuTrigger asChild>
               <li className="bg-muted/50 hover:bg-muted rounded-lg p-2 border">
                 <div className="flex gap-2 p-2">
