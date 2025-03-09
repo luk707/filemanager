@@ -252,3 +252,39 @@ async def copy_file(
     logger.info(
         f"Copied {path} in {workspace_id} TO {target_path} in {target_workspace_id}"
     )
+
+
+@app.put(
+    "/workspaces/{workspace_id}/mv/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def move_file(
+    workspace_id: str,
+    path: str,
+    target_path: str,
+    target_workspace_id: Optional[str] = None,
+):
+    """
+    Asynchronously moves a file from one workspace to another - by cp then rm
+
+    Args:
+      workspace_id (str): The ID of the workspace containing the source file.
+      path (str): The path of the source file within the workspace.
+      target_path (str): The path where the file should be moved to in the target workspace.
+      target_workspace_id (Optional[str], optional): The ID of the target workspace. If not provided, defaults to the source workspace ID.
+
+    Raises:
+      HTTPException: If the source file is not found in the specified workspace.
+
+    Logs:
+      Info: Logs the source and target paths along with their respective workspace IDs after a successful move operation.
+    """
+    target_workspace_id = (
+        workspace_id if target_workspace_id is None else target_workspace_id
+    )
+
+    await copy_file(workspace_id, path, target_path, target_workspace_id)
+    await delete_file(workspace_id, path)
+    logger.info(
+        f"Moved {path} in {workspace_id} TO {target_path} in {target_workspace_id}"
+    )
