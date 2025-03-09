@@ -50,17 +50,6 @@ async def add_process_time_header(request: Request, call_next):
     )
     return response
 
-
-@app.get("/")
-async def root():
-    """Root endpoint
-
-    Returns:
-        JSON Message:"Hello World"
-    """
-    return {"message": "Hello World"}
-
-
 @app.get("/workspaces/{workspace_id}/stat")
 @app.get("/workspaces/{workspace_id}/stat/{path:path}")
 async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
@@ -113,9 +102,6 @@ async def stat(workspace_id: str, path: Optional[str] = "") -> list[File]:
     # TODO: Use the path option to filter files in a specific path of the bucket
 
     # TODO: Check user has read permission for workspace
-
-    # is this not moot? it'll be handled by whatever access key given to the client; no? @see clients/minio.py
-
 
 @app.get("/workspaces/{workspace_id}/download/{path:path}")
 async def download_file(workspace_id: str, path: str):
