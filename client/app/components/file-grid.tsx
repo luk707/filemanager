@@ -1,4 +1,5 @@
-import { downloadFile, removeFile, type File } from "~/api/files";
+import { downloadFile, removeFile, FileSchema } from "~/api/files";
+import { z } from "zod";
 import { FileIcon } from "~/components/file-icon";
 import {
   ContextMenu,
@@ -33,18 +34,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { useInspector } from "~/hooks/use-inspector";
 
 export interface FileGridProps {
-  files: File[];
+  files: z.infer<typeof FileSchema>[];
 }
 
 export function FileGrid({ files }: FileGridProps) {
+  const { open: openInspector } = useInspector();
   const navigate = useNavigate();
   return (
     <ul className="w-full grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
       {files.map((file) => (
-        <AlertDialog>
-          <ContextMenu key={file.name}>
+        <AlertDialog key={file.name}>
+          <ContextMenu>
             <ContextMenuTrigger asChild>
               <li className="bg-muted/50 hover:bg-muted rounded-lg p-2 border">
                 <div className="flex gap-2 p-2">
@@ -94,7 +97,11 @@ export function FileGrid({ files }: FileGridProps) {
                   </ContextMenuItem>
                 </ContextMenuSubContent>
               </ContextMenuSub>
-              <ContextMenuItem>
+              <ContextMenuItem
+                onClick={() => {
+                  openInspector();
+                }}
+              >
                 <Info />
                 File details
                 <ContextMenuShortcut>

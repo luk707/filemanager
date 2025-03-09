@@ -1,50 +1,43 @@
-import { User } from "lucide-react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type UIEventHandler,
+} from "react";
 import { Outlet } from "react-router";
 import { AppSidebar } from "~/components/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "~/components/ui/breadcrumb";
-import { Separator } from "~/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
+import { InspectorSidebar } from "~/components/inspector-sidebar";
+
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { useInspector } from "~/hooks/use-inspector";
+
+const ShellContext = createContext({ fixedToTop: true });
+
+export function useShell() {
+  return useContext(ShellContext);
+}
 
 export default function Shell() {
+  const { isOpen: isInspectorOpen } = useInspector();
+  const [fixedToTop, setFixedToTop] = useState(true);
+
+  const handleScroll: UIEventHandler<HTMLElement> = (e) => {
+    setFixedToTop(e.currentTarget.scrollTop === 0);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2">
-          <div className="flex flex-1 items-center gap-2 px-3">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="line-clamp-1">
-                    <span className="flex gap-2">
-                      <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                        <User className="size-3" />
-                      </div>
-                      Luke's Workspace
-                    </span>
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator>/</BreadcrumbSeparator>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <div className="px-3">
+      <SidebarInset
+        className="overflow-y-scroll max-h-[calc(100vh-1rem)]"
+        onScroll={handleScroll}
+      >
+        <ShellContext.Provider value={{ fixedToTop }}>
           <Outlet />
-        </div>
+        </ShellContext.Provider>
       </SidebarInset>
+
+      <InspectorSidebar open={isInspectorOpen} />
     </SidebarProvider>
   );
 }
