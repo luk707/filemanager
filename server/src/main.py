@@ -37,7 +37,7 @@ async def add_process_time_header(request: Request, call_next):
         request (Request): params for the endpoint
 
     Returns:
-        response (the relavant endpoint's response)
+        response (the relavant endpoint's response time in ms)
     """
     start_time = time.perf_counter()
     response = await call_next(request)
@@ -122,10 +122,8 @@ async def download_file(workspace_id: str, path: str):
     try:
         file_object = client.stat_object(workspace_id, path)
         response = client.get_object(workspace_id, path)
-        file_content = b"".join(
-            chunk for chunk in response.stream()
-        )  # retrieves all chunks and combines them.
-        filename = os.path.basename(path)  # gets the filename from the path.
+        file_content = b"".join(chunk for chunk in response.stream())
+        filename = os.path.basename(path)
 
         return Response(
             content=file_content,
@@ -212,7 +210,7 @@ async def create_directory(workspace_id: str, path: str):
     "/workspaces/{workspace_id}/directory/{path:path}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete directory",
-    description="DESTRUCTIVE ACTION - Remove directory and all contents - DESTRUCTIVE ACTION",
+    description="DESTRUCTIVE ACTION - Remove a directory and all of its contents - DESTRUCTIVE ACTION",
 )
 async def delete_directory(workspace_id: str, path: str):
     """
