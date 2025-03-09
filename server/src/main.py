@@ -10,6 +10,7 @@ from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, statu
 from fastapi.middleware.cors import CORSMiddleware
 from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
+from minio.commonconfig  import CopySource
 from models.file import File
 
 app = FastAPI()
@@ -209,3 +210,36 @@ async def delete_directory(workspace_id: str, path: str):
     logger.info(
         f"DELETED {len(objects) - errors_count} of {len(objects)} object(s) from {path} in {workspace_id}."
     )
+
+@app.put("/workspaces/{workspace_id}/cp/{path:path}")
+async def copy_file(workspace_id: str, path: str, target_path: str):
+    try:
+      source = CopySource(workspace_id, path)
+      client.copy_object(workspace_id,path,source)
+    except S3Error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
+        )
+
+
+
+def copy_args (workspace_id:str,path:str,obj:Object):
+  source_obj = client.get_object(workspace_id, path)
+  
+  
+  
+  source_obj.release_conn()
+  
+  return copy_args
+
+# @app.put("/workspaces/{workspace_id}/cp/{path:path}")
+# async def copy_file(workspace_id: str, path: str, target_path: str):
+#     try:
+#       source = CopySource(workspace_id, path)
+#       client.copy_object(workspace_id,path,source)
+#     except S3Error:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
+#         )
