@@ -120,16 +120,15 @@ async def download_file(workspace_id: str, path: str):
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
 
+
 @app.post("/workspaces/{workspace_id}/upload")
-@app.post("/workspaces/{workspace_id}/upload/{directory_path:path}")
-async def upload_file(workspace_id: str, files: list[UploadFile], directory_path: Optional[str] = ""):
+@app.post("/workspaces/{workspace_id}/upload/{path:path}")
+async def upload_file(
+    workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
+):
     # Loop through each file in the list of files
     for file in files:
-        path = (
-            os.path.join(directory_path, file.filename)
-            if directory_path
-            else file.filename
-        )
+        path = os.path.join(path, file.filename) if path else file.filename
 
         file_stream = io.BytesIO(await file.read())
 
@@ -168,28 +167,28 @@ async def delete_file(workspace_id: str, path: str):
     # see @stat()
 
 
-@app.post("/workspaces/{workspace_id}/directory/{directory_path}")
-async def create_directory(workspace_id: str, directory_path: str):
+@app.post("/workspaces/{workspace_id}/directory/{path:path}")
+async def create_directory(workspace_id: str, path: str):
     empty_data = bytes()
     data_stream = io.BytesIO(empty_data)
     client.put_object(
         workspace_id,
-        directory_path + "/",
+        path + "/",
         data=data_stream,
         length=0,
     )
-    return {"message": f"CREATED {directory_path} in {workspace_id}"}
+    return {"message": f"CREATED {path} in {workspace_id}"}
 
 
 @app.delete(
-    "/workspaces/{workspace_id}/directory/{directory_path}",
+    "/workspaces/{workspace_id}/directory/{path:path}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_directory(workspace_id: str, directory_path: str):
+async def delete_directory(workspace_id: str, path: str):
     errors_count: int = 0
     del_list: list[str] = []
 
-    objects = list((client.list_objects(workspace_id, prefix=directory_path + "/")))
+    objects = list((client.list_objects(workspace_id, prefix=path + "/")))
 
     for i in objects:
         logger.debug(f"Adding {i.object_name} to delete list")
@@ -209,9 +208,9 @@ async def delete_directory(workspace_id: str, directory_path: str):
 
     if errors_count != 0:
         logger.warning(
-            f"FAILED to delete {errors_count} object(s) from {directory_path} in {workspace_id}"
+            f"FAILED to delete {errors_count} object(s) from {path} in {workspace_id}"
         )
 
     logger.info(
-        f"DELETED {len(del_list) - errors_count} of {len(del_list)} object(s) from {directory_path} in {workspace_id}."
+        f"DELETED {len(del_list) - errors_count} of {len(del_list)} object(s) from {path} in {workspace_id}."
     )
