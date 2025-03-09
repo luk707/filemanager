@@ -1,5 +1,5 @@
-import { type RouteConfig, index, layout } from "@react-router/dev/routes";
+import { type RouteConfig, layout, route } from "@react-router/dev/routes";
 
 export default [
-  layout("layouts/shell.tsx", [index("pages/file-browser.tsx")]),
+  layout("layouts/shell.tsx", [route("files/*", "pages/files.tsx")]),
 ] satisfies RouteConfig;

@@ -1,34 +1,58 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 from datetime import datetime
 from minio.datatypes import Object
-from typing import Optional
 import mimetypes
+from enum import Enum
+from typing import Annotated, Literal, Union
+import os
+
+
+class DirectoryListingType(str, Enum):
+    FILE = "file"
+    DIRECTORY = "directory"
 
 
 class File(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    type: Literal[DirectoryListingType.FILE] = DirectoryListingType.FILE
 
     name: str
     basename: str
     path: str
-    content_type: Optional[str] = "application/octet-stream"
-    size: Optional[int] = 0
-    last_modified: Optional[datetime]
-    is_dir: bool
+    content_type: str
+    size: int
+    last_modified: datetime
 
-    @staticmethod
-    def from_minio_object(obj: Object) -> "File":
-        obj_name = obj.object_name
-        return File(
-            name=obj_name,
-            content_type=obj.content_type
-            or mimetypes.guess_file_type(obj.object_name)[0],
-            size=obj.size,
-            last_modified=obj.last_modified,
-            basename=obj_name.split("/")[-1].split(".")[0],
-            path="/".join(obj_name.split("/")[:-1])
-            if len(obj_name.split("/")) > 1
-            else "/",
-            is_dir=obj_name.endswith("/"),
+
+class Directory(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    type: Literal[DirectoryListingType.DIRECTORY] = DirectoryListingType.DIRECTORY
+
+    name: str
+    path: str
+
+
+DirectoryListing = Annotated[
+    Union[File, Directory],
+    Field(discriminator="type"),
+]
+
+
+def directory_listing_from_object(obj: Object) -> DirectoryListing:
+    if obj.object_name.endswith("/"):
+        return Directory(
+            name=os.path.basename(obj.object_name[:-1]),
+            path=obj.object_name[:-1],
         )
+
+    return File(
+        name=obj.object_name,
+        content_type=obj.content_type
+        or mimetypes.guess_file_type(obj.object_name)[0]
+        or "application/octet-stream",
+        size=obj.size,
+        last_modified=obj.last_modified,
+        basename=os.path.basename(obj.object_name),
+        path=os.path.split(obj.object_name)[0],
+    )
