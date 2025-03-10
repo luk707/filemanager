@@ -102,34 +102,23 @@ async def stat(
     summary="Download file",
     description="Downloads the specified file from the specified workspace.",
 )
-async def download_file(workspace_id: str, path: str):
-    """
-    Asynchronously downloads a file from a specified workspace.
-
-    Args:
-      workspace_id (str): The ID of the workspace containing the file.
-      path (str): The path of the file within the workspace.
-
-    Returns:
-      Response: A response containing the file content and appropriate headers.
-
-    Raises:
-      HTTPException: If the file is not found in the specified workspace.
-    """
+async def download_file(
+    file_repository: FileRepositoryDependency, workspace_id: str, path: str
+):
     if not path:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
         )
     try:
-        file_object = client.stat_object(workspace_id, path)
-        response = client.get_object(workspace_id, path)
-        file_content = b"".join(chunk for chunk in response.stream())
-        filename = os.path.basename(path)
+
+        filename, file_content, content_type = await file_repository.download_file(
+            workspace_id, path
+        )
 
         return Response(
             content=file_content,
-            media_type=file_object.content_type,
+            media_type=content_type,
             headers={"Content-Disposition": f"attachment; filename={filename}"},
         )
     except S3Error:
@@ -150,7 +139,10 @@ async def download_file(workspace_id: str, path: str):
     description="Upload a file (BLOB) to the specified workspace and path.",
 )
 async def upload_file(
-    workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
+    file_repository: FileRepositoryDependency,
+    workspace_id: str,
+    files: list[UploadFile],
+    path: Optional[str] = "",
 ):
     """
     Asynchronously uploads files to a specified workspace.
@@ -186,7 +178,9 @@ async def upload_file(
     summary="Create a directory",
     description="Creates a directory in the specified workspace.",
 )
-async def create_directory(workspace_id: str, path: str):
+async def create_directory(
+    file_repository: FileRepositoryDependency, workspace_id: str, path: str
+):
     """
     Asynchronously creates a directory in the specified workspace.
 
@@ -214,7 +208,9 @@ async def create_directory(workspace_id: str, path: str):
     summary="Delete directory",
     description="DESTRUCTIVE ACTION - Remove a directory and all of its contents - DESTRUCTIVE ACTION",
 )
-async def delete_directory(workspace_id: str, path: str):
+async def delete_directory(
+    file_repository: FileRepositoryDependency, workspace_id: str, path: str
+):
     """
     Asynchronously deletes a directory and all contents within it from a workspace.
 
@@ -258,7 +254,9 @@ async def delete_directory(workspace_id: str, path: str):
     summary="Delete a file",
     description="DESTRUCTIVE ACTION - Deletes the specified file, in the specified workspace - DESTRUCTIVE ACTION",
 )
-async def delete_file(workspace_id: str, path: str):
+async def delete_file(
+    file_repository: FileRepositoryDependency, workspace_id: str, path: str
+):
     """
     Asynchronously deletes a file from a workspace.
 
@@ -297,6 +295,7 @@ async def delete_file(workspace_id: str, path: str):
     description="Copies a file from to another path, in the specified workspace.",
 )
 async def copy_file(
+    file_repository: FileRepositoryDependency,
     workspace_id: str,
     path: str,
     target_path: str,
@@ -341,6 +340,7 @@ async def copy_file(
     description="Move a file to another path, in the specified workspace.",
 )
 async def move_file(
+    file_repository: FileRepositoryDependency,
     workspace_id: str,
     path: str,
     target_path: str,

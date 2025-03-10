@@ -7,12 +7,12 @@ from models.file import DirectoryListing
 
 class FileRepository(ABC):
     @abstractmethod
-    async def download_file(self, workspace_id: str, path: str) -> bytes: ...
-
-    @abstractmethod
     async def stat(
         self, workspace_id: str, path: Optional[str] = None
     ) -> list[DirectoryListing]: ...
+
+    @abstractmethod
+    async def download_file(self, workspace_id: str, path: str) -> bytes: ...
 
     @abstractmethod
     async def upload_file(
