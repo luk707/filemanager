@@ -1,6 +1,7 @@
 "use client";
 
 import { type LucideIcon } from "lucide-react";
+import { Link } from "react-router";
 
 import {
   SidebarMenu,
@@ -24,7 +25,7 @@ export function NavMain({
       {items.map((item) => (
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild isActive={item.isActive}>
-            <a href={item.url} className="cursor-default">
+            <Link to={item.url} className="cursor-default">
               <item.icon />
               <span className="shrink-0">{item.title}</span>
               {item.shortcut && (
@@ -32,7 +33,7 @@ export function NavMain({
                   {item.shortcut}
                 </span>
               )}
-            </a>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}

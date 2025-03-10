@@ -5,10 +5,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { userPreferencesCookie, UserPreferencesSchema } from "./cookies.server";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -27,9 +29,18 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export async function loader({ request }: Route.LoaderArgs) {
+  const cookieHeader = request.headers.get("Cookie");
+  const cookie = (await userPreferencesCookie.parse(cookieHeader)) || {};
+  const userPreferences = UserPreferencesSchema.parse(cookie);
+  return { userPreferences };
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { userPreferences } =
+    useLoaderData<Awaited<ReturnType<typeof loader>>>();
   return (
-    <html lang="en">
+    <html lang="en" data-theme={userPreferences.theme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
