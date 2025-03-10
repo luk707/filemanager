@@ -12,7 +12,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await preferencesCookie.parse(cookieHeader)) || {};
   const preferences = PreferencesSchema.parse(cookie);
-  console.log("LOADED PREFS");
   return { preferences };
 }
 
