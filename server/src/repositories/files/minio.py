@@ -1,18 +1,18 @@
 from typing import Optional
 
 from clients.minio import client
-from fastapi import HTTPException, UploadFile, status  # TODO: Remove FastAPI dependency
-from minio.error import S3Error
+from fastapi import UploadFile  # TODO: Remove FastAPI dependency
 from models.file import DirectoryListing, directory_listing_from_object
 from repositories.files.base import FileRepository
 
 
 class MinioFileRepository(FileRepository):
-    async def download_file(workspace_id: str, path: str) -> bytes:
+
+    async def download_file(self, workspace_id: str, path: str) -> bytes:
         pass
 
     async def stat(
-        workspace_id: str, path: Optional[str] = None
+        self, workspace_id: str, path: Optional[str] = None
     ) -> list[DirectoryListing]:
         """
         Asynchronously retrieves the status of files in a specified workspace.
@@ -28,22 +28,16 @@ class MinioFileRepository(FileRepository):
           HTTPException: If the specified path is not found in the workspace.
         """
 
-        try:
-            objects = list(
-                client.list_objects(
-                    workspace_id, prefix=f"{path}/" if path is not None else None
-                )
+        objects = list(
+            client.list_objects(
+                workspace_id, prefix=f"{path}/" if path is not None else None
             )
-            return [
-                directory_listing_from_object(obj)
-                for obj in objects
-                if obj.object_name != f"{path}/"
-            ]
-        except S3Error:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-            )
+        )
+        return [
+            directory_listing_from_object(obj)
+            for obj in objects
+            if obj.object_name != f"{path}/"
+        ]
 
         # -- for a later date --
         # TODO: as well a listing of the files in the directory, we should also list
@@ -55,20 +49,21 @@ class MinioFileRepository(FileRepository):
         # TODO: Check user has read permission for workspace
 
     async def upload_file(
-        workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
+        self, workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
     ) -> None:
         pass
 
-    async def create_directory(workspace_id: str, path: str) -> None:
+    async def create_directory(self, workspace_id: str, path: str) -> None:
         pass
 
-    async def delete_directory(workspace_id: str, path: str) -> None:
+    async def delete_directory(self, workspace_id: str, path: str) -> None:
         pass
 
-    async def delete_file(workspace_id: str, path: str) -> None:
+    async def delete_file(self, workspace_id: str, path: str) -> None:
         pass
 
     async def copy_file(
+        self,
         workspace_id: str,
         path: str,
         target_path: str,
@@ -77,6 +72,7 @@ class MinioFileRepository(FileRepository):
         pass
 
     async def move_file(
+        self,
         workspace_id: str,
         path: str,
         target_path: str,
