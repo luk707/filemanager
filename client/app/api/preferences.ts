@@ -7,6 +7,7 @@ export const ThemeSchema = z.union([
   z.literal("dark"),
   z.literal("light"),
   z.literal("system"),
+  z.literal("plum"),
 ]);
 
 export const PreferencesSchema = z.object({

@@ -72,6 +72,10 @@ export default function UserPreferencesPage({
                     <RadioGroupItem value="system" id="theme-system" />
                     <Label htmlFor="theme-system">System</Label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="plum" id="theme-plum" />
+                    <Label htmlFor="theme-plum">Plum</Label>
+                  </div>
                 </RadioGroup>
               </PreferencesField>
             </PreferencesSection>
