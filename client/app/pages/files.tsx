@@ -9,8 +9,6 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import {
-  ChevronLeft,
-  ChevronRight,
   Columns3,
   FolderPlus,
   GalleryThumbnails,
@@ -18,7 +16,6 @@ import {
   List,
   User,
 } from "lucide-react";
-import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useShell } from "~/layouts/shell";
 import { Button } from "~/components/ui/button";
 import { DirectoryGrid } from "~/components/directory-grid";
@@ -34,7 +31,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,

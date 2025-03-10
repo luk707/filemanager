@@ -1,12 +1,6 @@
 import { createCookie } from "react-router";
-import { z } from "zod";
+import { preferencesCookieName } from "~/api/preferences";
 
-export const UserPreferencesSchema = z.object({
-  theme: z
-    .union([z.literal("dark"), z.literal("light"), z.literal("system")])
-    .default("system"),
-});
-
-export const userPreferencesCookie = createCookie("user-preferences", {
+export const preferencesCookie = createCookie(preferencesCookieName, {
   maxAge: 604_800, // one week
 });

@@ -22,7 +22,7 @@ export default function Shell() {
   const [fixedToTop, setFixedToTop] = useState(true);
 
   const handleScroll: UIEventHandler<HTMLElement> = (e) => {
-    setFixedToTop(e.currentTarget.scrollTop === 0);
+    setFixedToTop(e.currentTarget.scrollTop <= 0);
   };
 
   return (

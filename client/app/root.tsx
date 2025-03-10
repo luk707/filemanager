@@ -1,4 +1,5 @@
 import {
+  data,
   isRouteErrorResponse,
   Links,
   Meta,
@@ -10,7 +11,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { userPreferencesCookie, UserPreferencesSchema } from "./cookies.server";
+import { preferencesCookie } from "~/cookies.server";
+import { PreferencesSchema } from "~/api/preferences";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -31,16 +33,22 @@ export const links: Route.LinksFunction = () => [
 
 export async function loader({ request }: Route.LoaderArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const cookie = (await userPreferencesCookie.parse(cookieHeader)) || {};
-  const userPreferences = UserPreferencesSchema.parse(cookie);
-  return { userPreferences };
+  const cookie = (await preferencesCookie.parse(cookieHeader)) || {};
+  const preferences = PreferencesSchema.parse(cookie);
+  return data(
+    { preferences },
+    {
+      headers: {
+        "Set-Cookie": await preferencesCookie.serialize(preferences),
+      },
+    }
+  );
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { userPreferences } =
-    useLoaderData<Awaited<ReturnType<typeof loader>>>();
+  const { preferences } = useLoaderData<Awaited<ReturnType<typeof loader>>>();
   return (
-    <html lang="en" data-theme={userPreferences.theme}>
+    <html lang="en" data-theme={preferences.theme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
