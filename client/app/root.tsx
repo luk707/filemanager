@@ -1,4 +1,5 @@
 import {
+  data,
   isRouteErrorResponse,
   Links,
   Meta,
@@ -9,6 +10,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { preferencesCookie } from "~/cookies.server";
+import { PreferencesSchema } from "~/api/preferences";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -27,9 +30,24 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export async function loader({ request }: Route.LoaderArgs) {
+  const cookieHeader = request.headers.get("Cookie");
+  const cookie = (await preferencesCookie.parse(cookieHeader)) || {};
+  const preferences = PreferencesSchema.parse(cookie);
+  return data(
+    { preferences },
+    {
+      headers: {
+        "Set-Cookie": await preferencesCookie.serialize(preferences),
+      },
+    }
+  );
+}
+
+export default function App({ loaderData }: Route.ComponentProps) {
+  const { preferences } = loaderData;
   return (
-    <html lang="en">
+    <html lang="en" data-theme={preferences.theme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,16 +55,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="overscroll-none overflow-hidden">
-        {children}
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

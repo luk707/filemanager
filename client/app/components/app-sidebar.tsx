@@ -11,8 +11,10 @@ import {
   Plus,
   PoundSterling,
   Search,
+  Settings2,
   Shapes,
   Sparkles,
+  Star,
   User,
 } from "lucide-react";
 
@@ -30,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useFileUpload } from "~/hooks/use-file-upload";
+import { matchPath, useLocation } from "react-router";
 
 // This is sample data.
 const data = {
@@ -55,37 +58,19 @@ const data = {
       plan: "Free",
     },
   ],
-  navMain: [
-    {
-      title: "Search",
-      url: "#",
-      icon: Search,
-      shortcut: "⌘K",
-    },
-    {
-      title: "Home",
-      url: "#",
-      icon: Home,
-      isActive: true,
-    },
-    {
-      title: "Ask AI",
-      url: "#",
-      icon: Sparkles,
-    },
-    {
-      title: "Workspaces",
-      url: "#",
-      icon: Shapes,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { handleFileUpload } = useFileUpload("files");
+  const location = useLocation();
 
   return (
-    <Sidebar variant="inset" className="border-r-0" {...props}>
+    <Sidebar
+      collapsible="icon"
+      variant="inset"
+      className="border-r-0"
+      {...props}
+    >
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={data.workspaces} />
         <div>
@@ -132,7 +117,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <NavMain items={data.navMain} />
+        <NavMain
+          items={[
+            {
+              title: "Search",
+              url: "#",
+              icon: Search,
+              shortcut: "⌘K",
+            },
+            {
+              title: "Home",
+              url: "/files",
+              icon: Home,
+              isActive: !!matchPath("/files/*", location.pathname),
+            },
+            {
+              title: "Ask AI",
+              url: "#",
+              icon: Sparkles,
+            },
+            {
+              title: "Workspaces",
+              url: "#",
+              icon: Shapes,
+            },
+            {
+              title: "Favorites",
+              url: "#",
+              icon: Star,
+            },
+            {
+              title: "Preferences",
+              url: "/preferences",
+              icon: Settings2,
+              isActive: !!matchPath("/preferences", location.pathname),
+            },
+          ]}
+        />
       </SidebarHeader>
     </Sidebar>
   );

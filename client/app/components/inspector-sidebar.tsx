@@ -74,7 +74,7 @@ export function InspectorSidebar({
               <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
             <TabsContent value="details" className="flex flex-col gap-4">
-              <div className="aspect-[4/3] bg-white rounded-md border" />
+              <div className="aspect-[4/3] bg-background rounded-md border" />
               <dl className="flex flex-col gap-1">
                 <dt className="text-sm">Type</dt>
                 <dd className="text-sm text-muted-foreground pb-1 font-mono">
