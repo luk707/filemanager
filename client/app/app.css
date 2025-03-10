@@ -2,20 +2,6 @@
 
 @plugin "tailwindcss-animate";
 
-/* @custom-variant dark (&:is(.dark *)); */
-
-/* @custom-variant dark (&:where(body[data-theme="dark"])); */
-
-
-/* html,
-body {
-  @apply bg-white dark:bg-gray-950;
-
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
-} */
-
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
