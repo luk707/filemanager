@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from clients.minio import client
@@ -7,10 +8,6 @@ from repositories.files.base import FileRepository
 
 
 class MinioFileRepository(FileRepository):
-
-    async def download_file(self, workspace_id: str, path: str) -> bytes:
-        pass
-
     async def stat(
         self, workspace_id: str, path: Optional[str] = None
     ) -> list[DirectoryListing]:
@@ -47,6 +44,30 @@ class MinioFileRepository(FileRepository):
         # TODO: Use the path option to filter files in a specific path of the bucket
 
         # TODO: Check user has read permission for workspace
+
+    async def download_file(
+        self, workspace_id: str, path: str
+    ) -> tuple[str, bytes, str]:
+        """
+        Asynchronously downloads a file from a specified workspace.
+
+        Args:
+          workspace_id (str): The ID of the workspace containing the file.
+          path (str): The path of the file within the workspace.
+
+        Returns:
+          tuple: A tuple containing the filename, file content, and content type.
+
+        Raises:
+          HTTPException: If the file is not found in the specified workspace.
+        """
+
+        file_object = client.stat_object(workspace_id, path)
+        response = client.get_object(workspace_id, path)
+        file_content = b"".join(chunk for chunk in response.stream())
+        filename = os.path.basename(path)
+
+        return (filename, file_content, file_object.content_type)
 
     async def upload_file(
         self, workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
