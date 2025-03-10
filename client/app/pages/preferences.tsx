@@ -44,14 +44,14 @@ export default function UserPreferencesPage({
           </div>
         </Toolbar>
         <div className="space-y-12 py-3 px-5">
-          <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b pb-12 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b pb-12 lg:grid-cols-3">
             <div>
               <h2 className="text-base/7 font-semibold">Appearance</h2>
               <p className="mt-1 text-sm/6 text-muted-foreground">
                 Adjust the look and feel of the application.
               </p>
             </div>
-            <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8">
               <fieldset>
                 <legend className="text-sm/6 font-semibold">Theme</legend>
                 <p className="mt-1 text-sm/6 text-muted-foreground">

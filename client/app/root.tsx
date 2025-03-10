@@ -6,7 +6,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -45,8 +44,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   );
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  const { preferences } = useLoaderData<Awaited<ReturnType<typeof loader>>>();
+export default function App({ loaderData }: Route.ComponentProps) {
+  const { preferences } = loaderData;
   return (
     <html lang="en" data-theme={preferences.theme}>
       <head>
@@ -56,16 +55,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="overscroll-none overflow-hidden">
-        {children}
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
