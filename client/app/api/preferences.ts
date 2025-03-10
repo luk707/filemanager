@@ -1,5 +1,4 @@
 import { z } from "zod";
-import Cookies from "js-cookie";
 
 // Must not change
 export const preferencesCookieName = "__preferences";
