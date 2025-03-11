@@ -11,4 +11,4 @@ def test_client():
 
 def test_ready(test_client):
     response = test_client.get("/ready")
-    assert response.status_code == status.HTTP_204_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
