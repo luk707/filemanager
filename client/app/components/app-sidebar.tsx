@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  BookOpenText,
   Box,
   FileArchive,
   FileUp,
@@ -20,7 +21,7 @@ import {
 
 import { NavMain } from "~/components/nav-main";
 import { WorkspaceSwitcher } from "~/components/workspace-switcher";
-import { Sidebar, SidebarHeader, SidebarRail } from "~/components/ui/sidebar";
+import { Sidebar, SidebarHeader } from "~/components/ui/sidebar";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -32,7 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useFileUpload } from "~/hooks/use-file-upload";
-import { matchPath, useLocation } from "react-router";
+import { matchPath, useLocation, useRouteLoaderData } from "react-router";
+import type { Route } from "../+types/root";
 
 // This is sample data.
 const data = {
@@ -63,7 +65,9 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { handleFileUpload } = useFileUpload("files");
   const location = useLocation();
-
+  // TODO: Replace this with react context at the root level
+  const { preferences } =
+    useRouteLoaderData<Route.ComponentProps["loaderData"]>("root")!;
   return (
     <Sidebar
       collapsible="icon"
@@ -151,6 +155,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               url: "/preferences",
               icon: Settings2,
               isActive: !!matchPath("/preferences", location.pathname),
+            },
+            preferences.developerAPIDocumentationEnabled && {
+              title: "API Documentation",
+              url: "/api/documentation",
+              icon: BookOpenText,
+              isActive: !!matchPath("/api/documentation", location.pathname),
             },
           ]}
         />
