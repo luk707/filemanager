@@ -7,7 +7,6 @@ from typing import Optional
 import humanize
 from clients.minio import client
 from fastapi import (
-    Depends,
     FastAPI,
     HTTPException,
     Request,
@@ -156,10 +155,8 @@ async def upload_file(
     workspace_id: str,
     files: list[UploadFile],
     path: Optional[str] = "",
-    logger: logging.Logger = Depends(get_logger),
 ):
     await file_repository.upload_file(
-        logger,
         workspace_id,
         files,
         path,

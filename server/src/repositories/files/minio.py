@@ -11,6 +11,10 @@ from repositories.files.base import FileRepository
 
 
 class MinioFileRepository(FileRepository):
+
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+
     async def stat(
         self, workspace_id: str, path: Optional[str] = None
     ) -> list[DirectoryListing]:
@@ -74,7 +78,6 @@ class MinioFileRepository(FileRepository):
 
     async def upload_file(
         self,
-        logger: logging.Logger,
         workspace_id: str,
         files: list[UploadFile],
         path: Optional[str] = "",
@@ -103,7 +106,7 @@ class MinioFileRepository(FileRepository):
                 content_type=file.content_type,
             )
 
-            logging.info(
+            self.logger.info(
                 f"UPLOADED {file.filename} ({humanize.naturalsize(file.size)}) to {workspace_id}/{upload_path}"
             )
 
