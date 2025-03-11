@@ -4,13 +4,12 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import type { Route } from "./+types/preferences";
 import { preferencesCookie } from "~/cookies.server";
-import { PreferencesSchema, ThemeSchema } from "~/api/preferences";
+import { PreferencesSchema } from "~/api/preferences";
 import { data, Form } from "react-router";
 import { Button } from "~/components/ui/button";
 import { PreferencesSection } from "~/components/preferences-section";
 import { PreferencesField } from "~/components/preferences-field";
 import { Switch } from "~/components/ui/switch";
-import type { z } from "zod";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const cookieHeader = request.headers.get("Cookie");
