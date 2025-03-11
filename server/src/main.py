@@ -5,13 +5,14 @@ import time
 from typing import Optional
 
 import humanize
-from clients.minio import client
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from minio.commonconfig import CopySource
 from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
-from models.file import DirectoryListing, directory_listing_from_object
+
+from src.clients.minio import client
+from src.models.file import DirectoryListing, directory_listing_from_object
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")
@@ -49,6 +50,27 @@ async def add_process_time_header(request: Request, call_next):
         f"took {humanize.naturaldelta(process_time, minimum_unit='milliseconds')}"
     )
     return response
+
+
+@app.get(
+    "/ready",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Readiness Probe",
+)
+async def ready():
+    """
+    This endpoint returns a 204 No Content response to indicate that the service
+    is running and ready to accept traffic.
+
+    Example usage:
+        GET /ready
+
+    Response:
+        204 No Content
+
+    Typically used for Kubernetes or load balancer health checks.
+    """
+    pass
 
 
 @app.get(
