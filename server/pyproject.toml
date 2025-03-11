@@ -12,7 +12,8 @@ dependencies = [
     "fastapi[standard] (>=0.115.11,<0.116.0)",
     "minio (>=7.2.15,<8.0.0)",
     "rich (>=13.9.4,<14.0.0)",
-    "humanize (>=4.12.1,<5.0.0)"
+    "humanize (>=4.12.1,<5.0.0)",
+    "pytest (>=8.3.5,<9.0.0)"
 ]
 
 [tool.poetry]
