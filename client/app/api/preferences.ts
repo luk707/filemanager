@@ -12,4 +12,5 @@ export const ThemeSchema = z.union([
 
 export const PreferencesSchema = z.object({
   theme: ThemeSchema.default("system"),
+  developerAPIDocumentationEnabled: z.boolean().default(false),
 });
