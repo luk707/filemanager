@@ -56,7 +56,7 @@ export function FileGrid({ files }: FileGridProps) {
                     {file.basename}
                   </span>
                 </div>
-                <div className="aspect-[4/3] bg-white rounded-md" />
+                <div className="aspect-[4/3] bg-background rounded-md" />
               </li>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-64">
