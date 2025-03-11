@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -16,7 +17,11 @@ class FileRepository(ABC):
 
     @abstractmethod
     async def upload_file(
-        self, workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
+        self,
+        logger: logging.Logger,
+        workspace_id: str,
+        files: list[UploadFile],
+        path: Optional[str] = "",
     ) -> None: ...
 
     @abstractmethod

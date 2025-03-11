@@ -1,6 +1,9 @@
+import io
+import logging
 import os
 from typing import Optional
 
+import humanize
 from clients.minio import client
 from fastapi import UploadFile  # TODO: Remove FastAPI dependency
 from models.file import DirectoryListing, directory_listing_from_object
@@ -70,9 +73,39 @@ class MinioFileRepository(FileRepository):
         return (filename, file_content, file_object.content_type)
 
     async def upload_file(
-        self, workspace_id: str, files: list[UploadFile], path: Optional[str] = ""
+        self,
+        logger: logging.Logger,
+        workspace_id: str,
+        files: list[UploadFile],
+        path: Optional[str] = "",
     ) -> None:
-        pass
+        """
+        Asynchronously uploads files to a specified workspace.
+
+        Args:
+          workspace_id (str): The ID of the workspace where the files will be uploaded.
+          files (list[UploadFile]): A list of files to be uploaded.
+          path (Optional[str], optional): The path within the workspace where the files will be uploaded. Defaults to "".
+
+        Logs:
+          Info: Logs the filename, size, and upload path for each uploaded file.
+        """
+        for file in files:
+            upload_path = os.path.join(path, file.filename) if path else file.filename
+
+            file_stream = io.BytesIO(await file.read())
+
+            client.put_object(
+                workspace_id,
+                upload_path,
+                file_stream,
+                length=file.size,
+                content_type=file.content_type,
+            )
+
+            logging.info(
+                f"UPLOADED {file.filename} ({humanize.naturalsize(file.size)}) to {workspace_id}/{upload_path}"
+            )
 
     async def create_directory(self, workspace_id: str, path: str) -> None:
         pass
