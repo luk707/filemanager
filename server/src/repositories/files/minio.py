@@ -6,6 +6,7 @@ from typing import Optional
 import humanize
 from clients.minio import client
 from fastapi import HTTPException, UploadFile, status  # TODO: Remove FastAPI dependency
+from minio.commonconfig import CopySource
 from minio.error import S3Error
 from models.file import DirectoryListing, directory_listing_from_object
 from repositories.files.base import FileRepository
@@ -209,7 +210,36 @@ class MinioFileRepository(FileRepository):
         target_path: str,
         target_workspace_id: Optional[str] = None,
     ) -> None:
-        pass
+        """
+        Asynchronously copies a file from one location to another within the same workspace, or to another workspace.
+
+        Args:
+          workspace_id (str): The ID of the workspace containing the source file.
+          path (str): The path of the source file within the workspace.
+          target_path (str): The path where the file should be copied to in the target workspace.
+          target_workspace_id (Optional[str], optional): The ID of the target workspace. If not provided, defaults to the source workspace ID.
+
+        Raises:
+          HTTPException: If the source file is not found in the specified workspace.
+
+        Logs:
+          Info: Logs the source and target paths along with their respective workspace IDs after a successful copy operation.
+        """
+        target_workspace_id = (
+            workspace_id if target_workspace_id is None else target_workspace_id
+        )
+        try:
+            source = CopySource(workspace_id, path)
+            client.copy_object(target_workspace_id, target_path, source)
+
+        except S3Error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
+            )
+        self.logger.info(
+            f"Copied {path} in {workspace_id} TO {target_path} in {target_workspace_id}"
+        )
 
     async def move_file(
         self,
