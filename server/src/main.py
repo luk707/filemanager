@@ -193,36 +193,7 @@ async def delete_directory(
 async def delete_file(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
-    """
-    Asynchronously deletes a file from a workspace.
-
-    Args:
-      workspace_id (str): The ID of the workspace containing the file.
-      path (str): The path of the file within the workspace.
-
-    Raises:
-      HTTPException: If the file is not found in the specified workspace.
-
-    Logs:
-      Info: Logs the path of the file deleted from the specified workspace.
-    """
-    try:
-        # Check if the file exists
-        client.stat_object(workspace_id, path)
-    except S3Error:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"404_NOT_FOUND: {path} not found in {workspace_id}",
-        )
-
-    # Perform the deletion
-    client.remove_object(workspace_id, path)
-    logger.info(f"DELETED {path} from {workspace_id}")
-
-    # -- for a later date --
-    # TODO: Check user has write permission for workspace
-    # see @stat()
-
+    await file_repository.delete_file(workspace_id, path)
 
 @app.put(
     "/workspaces/{workspace_id}/cp/{path:path}",
