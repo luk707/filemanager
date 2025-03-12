@@ -1,5 +1,4 @@
 import http
-import io
 import logging
 import time
 from typing import Optional
@@ -173,25 +172,8 @@ async def upload_file(
 async def create_directory(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
-    """
-    Asynchronously creates a directory in the specified workspace.
 
-    Args:
-      workspace_id (str): The ID of the workspace where the directory will be created.
-      path (str): The path of the directory to be created within the workspace.
-
-    Returns:
-      dict: A message indicating the directory creation status.
-    """
-    empty_data = bytes()
-    data_stream = io.BytesIO(empty_data)
-    client.put_object(
-        workspace_id,
-        path + "/",
-        data=data_stream,
-        length=0,
-    )
-    return {"message": f"CREATED {path} in {workspace_id}"}
+    return await file_repository.create_directory(workspace_id, path)
 
 
 @app.delete(

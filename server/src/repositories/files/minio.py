@@ -111,7 +111,25 @@ class MinioFileRepository(FileRepository):
             )
 
     async def create_directory(self, workspace_id: str, path: str) -> None:
-        pass
+        """
+        Asynchronously creates a directory in the specified workspace.
+
+        Args:
+          workspace_id (str): The ID of the workspace where the directory will be created.
+          path (str): The path of the directory to be created within the workspace.
+
+        Returns:
+          dict: A message indicating the directory creation status.
+        """
+        empty_data = bytes()
+        data_stream = io.BytesIO(empty_data)
+        client.put_object(
+            workspace_id,
+            path + "/",
+            data=data_stream,
+            length=0,
+        )
+        return {"message": f"CREATED {path} in {workspace_id}"}
 
     async def delete_directory(self, workspace_id: str, path: str) -> None:
         pass
