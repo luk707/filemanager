@@ -22,6 +22,12 @@ Dependencies can be installed using `npm install` to fetch new dependencies and 
 
 Unit tests can be run using `npm test`.
 
+### Storybook
+
+To view a catalog of all the components used by the frontend you can run the storybook component browser.
+
+After running `npm install` simply run `npm run storybook` and it should open automatically in your preferred browser.
+
 ## Tips
 
 ### Installing node and npm
