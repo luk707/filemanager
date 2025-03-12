@@ -15,7 +15,6 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from minio.commonconfig import CopySource
-from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
 
 from src.clients.minio import client
@@ -172,8 +171,7 @@ async def upload_file(
 async def create_directory(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
-
-    return await file_repository.create_directory(workspace_id, path)
+    return {"message": f"CREATED {path} in {workspace_id}"}
 
 
 @app.delete(
@@ -185,42 +183,7 @@ async def create_directory(
 async def delete_directory(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
-    """
-    Asynchronously deletes a directory and all contents within it from a workspace.
-
-    Args:
-      workspace_id (str): The ID of the workspace containing the source file.
-      path (str): The path of the source file within the workspace.
-
-    Logs:
-      Info: Logs the number of objects deleted from the specified workspace, and the total objects to delete
-    """
-    errors_count: int = 0
-
-    objects = list((client.list_objects(workspace_id, prefix=path + "/")))
-
-    errors = client.remove_objects(
-        workspace_id,
-        [DeleteObject(object.object_name) for object in objects],
-    )
-
-    logger.info(f"Added {len(objects)} objects to be removed")
-
-    for error in errors:
-        errors_count += 1
-        logger.warning(
-            f"Failed to delete object '{error.name}' with error code '{error.code}'."
-        )
-
-    if errors_count != 0:
-        logger.warning(
-            f"FAILED to delete {errors_count} object(s) from {path} in {workspace_id}"
-        )
-
-    logger.info(
-        f"DELETED {len(objects) - errors_count} of {len(objects)} object(s) from {path} in {workspace_id}."
-    )
-
+    await file_repository.delete_directory(workspace_id, path)
 
 @app.delete(
     "/workspaces/{workspace_id}/remove/{path:path}",

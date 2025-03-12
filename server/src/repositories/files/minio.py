@@ -132,7 +132,42 @@ class MinioFileRepository(FileRepository):
         return {"message": f"CREATED {path} in {workspace_id}"}
 
     async def delete_directory(self, workspace_id: str, path: str) -> None:
-        pass
+        """
+        Asynchronously deletes a directory and all contents within it from a workspace.
+
+        Args:
+          workspace_id (str): The ID of the workspace containing the source file.
+          path (str): The path of the source file within the workspace.
+
+        Logs:
+          Info: Logs the number of objects deleted from the specified workspace, and the total objects to delete
+        """
+        errors_count: int = 0
+
+        objects = list(client.list_objects(workspace_id, prefix=path + "/"))
+
+        # Fix DeleteObject undefined - comes from parent?
+        errors = client.remove_objects(
+            workspace_id,
+            [client.remove_object(workspace_id, obj.object_name) for obj in objects],
+        )
+
+        self.logger.info(f"Added {len(objects)} objects to be removed")
+
+        for error in errors:
+            errors_count += 1
+            self.logger.warning(
+                f"Failed to delete object '{error.name}' with error code '{error.code}'."
+            )
+
+        if errors_count != 0:
+            self.logger.warning(
+                f"FAILED to delete {errors_count} object(s) from {path} in {workspace_id}"
+            )
+
+        self.logger.info(
+            f"DELETED {len(objects) - errors_count} of {len(objects)} object(s) from {path} in {workspace_id}."
+        )
 
     async def delete_file(self, workspace_id: str, path: str) -> None:
         pass
