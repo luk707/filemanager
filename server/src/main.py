@@ -15,7 +15,6 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from minio.error import S3Error
 
-from src.clients.minio import client
 from src.models.file import DirectoryListing
 
 app = FastAPI()
