@@ -4,16 +4,15 @@ import os
 from typing import Optional
 
 import humanize
-from clients.minio import client
+from src.clients.minio import client
 from fastapi import HTTPException, UploadFile, status  # TODO: Remove FastAPI dependency
 from minio.commonconfig import CopySource
 from minio.error import S3Error
-from models.file import DirectoryListing, directory_listing_from_object
-from repositories.files.base import FileRepository
+from src.models.file import DirectoryListing, directory_listing_from_object
+from src.repositories.files.base import FileRepository
 
 
 class MinioFileRepository(FileRepository):
-
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
@@ -248,7 +247,6 @@ class MinioFileRepository(FileRepository):
         target_path: str,
         target_workspace_id: Optional[str] = None,
     ) -> None:
-
         """
         Asynchronously moves a file from one workspace to another - by cp then rm
 

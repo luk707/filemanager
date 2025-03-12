@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from fastapi import UploadFile  # TODO: Remove FastAPI dependency
-from models.file import DirectoryListing
+from src.models.file import DirectoryListing
 
 
 class FileRepository(ABC):

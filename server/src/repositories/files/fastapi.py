@@ -2,8 +2,8 @@ import logging
 from typing import Annotated
 
 from fastapi import Depends
-from repositories.files.base import FileRepository
-from repositories.files.minio import MinioFileRepository
+from src.repositories.files.base import FileRepository
+from src.repositories.files.minio import MinioFileRepository
 
 logger = logging.getLogger("uvicorn.error")
 
