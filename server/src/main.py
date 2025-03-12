@@ -171,8 +171,7 @@ async def upload_file(
 async def create_directory(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
-    return {"message": f"CREATED {path} in {workspace_id}"}
-
+    await file_repository.create_directory(workspace_id, path)
 
 @app.delete(
     "/workspaces/{workspace_id}/directory/{path:path}",
