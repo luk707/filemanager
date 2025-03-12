@@ -138,11 +138,13 @@ async def download_file(
 
 @app.post(
     "/workspaces/{workspace_id}/upload",
+    status_code=status.HTTP_204_NO_CONTENT,
     summary="",
     description="",
 )
 @app.post(
     "/workspaces/{workspace_id}/upload/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
     summary="Upload a file",
     description="Upload a file (BLOB) to the specified workspace and path.",
 )
@@ -163,6 +165,7 @@ async def upload_file(
 
 @app.post(
     "/workspaces/{workspace_id}/directory/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
     summary="Create a directory",
     description="Creates a directory in the specified workspace.",
 )
@@ -170,6 +173,7 @@ async def create_directory(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
     await file_repository.create_directory(workspace_id, path)
+
 
 @app.delete(
     "/workspaces/{workspace_id}/directory/{path:path}",
@@ -181,6 +185,7 @@ async def delete_directory(
     file_repository: FileRepositoryDependency, workspace_id: str, path: str
 ):
     await file_repository.delete_directory(workspace_id, path)
+
 
 @app.delete(
     "/workspaces/{workspace_id}/remove/{path:path}",
