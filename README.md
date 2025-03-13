@@ -1,5 +1,15 @@
 # filemanager
 
+## Contributors ✨
+
+Thanks go to these wonderful people
+
+<a href = "https://github.com/luk707/filemanager/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=luk707/filemanager"/>
+</a>
+
+Made with [contributors-img](https://contrib.rocks).
+
 ## Development
 
 ### Prerequisites
