@@ -4,10 +4,10 @@ import os
 from typing import Optional
 
 import humanize
-from src.clients.minio import client
 from fastapi import HTTPException, UploadFile, status  # TODO: Remove FastAPI dependency
 from minio.commonconfig import CopySource
 from minio.error import S3Error
+from src.clients.minio import client
 from src.models.file import DirectoryListing, directory_listing_from_object
 from src.repositories.files.base import FileRepository
 
