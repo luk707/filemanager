@@ -16,7 +16,7 @@ async def test_stat_successful(
     mocker,
     test_client,
 ):
-    mock_reponse = [
+    mock_response = [
         Object(
             bucket_name="test_workspace_id",
             object_name="some/path/test_file.txt",
@@ -31,7 +31,7 @@ async def test_stat_successful(
             last_modified="2021-10-01T12:00:00Z",
         ),
     ]
-    test_client.list_objects = mocker.MagicMock(return_value=mock_reponse)
+    test_client.list_objects = mocker.MagicMock(return_value=mock_response)
     repository = MinioFileRepository(test_client, None)
     response = await repository.stat("test_workspace_id", "some/path")
     test_client.list_objects.assert_called_once_with(
@@ -39,7 +39,7 @@ async def test_stat_successful(
     )
     assert response == [
         directory_listing_from_object(obj)
-        for obj in mock_reponse
+        for obj in mock_response
         if obj.object_name != "some/path/"
     ]
 
