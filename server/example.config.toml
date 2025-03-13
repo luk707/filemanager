@@ -16,7 +16,7 @@ bind-dn = "uid=sa_filemanager,ou=people,dc=example,dc=com"
 # Credentials of the service account
 bind-password = "*****"
 # A mapping of LDAP attributes to the file manager user model
-attribute-map = { id = "uuid", createdAt = "createtimestamp", name = "cn", avatar = "avatar" }
+attribute-map = { id = "uuid", username = "uid", email = "mail", createdAt = "createtimestamp", name = "cn", avatar = "avatar" }
 
 
 [storage-backend]

@@ -30,6 +30,8 @@ export default function UserManagementPage({
       <TableHeader>
         <TableRow>
           <TableHead>Full name</TableHead>
+          <TableHead>Username</TableHead>
+          <TableHead>Email</TableHead>
           <TableHead>Joined date</TableHead>
         </TableRow>
       </TableHeader>
@@ -45,6 +47,8 @@ export default function UserManagementPage({
               </Avatar>
               {user.name}
             </TableCell>
+            <TableCell>{user.username}</TableCell>
+            <TableCell>{user.email}</TableCell>
             <TableCell>
               {user.createdAt &&
                 format(parseISO(user.createdAt), "MMMM d, yyyy")}

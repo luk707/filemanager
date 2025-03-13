@@ -38,7 +38,7 @@ class LDAPUserRepository(UserRepository):
         search_attributes = {
             key: attr
             for key, attr in self.configuration.attribute_map.items()
-            if key != "avatar"
+            if key not in ["avatar", "groups"]
         }
 
         with self.get_bind_connection() as connection:
@@ -97,3 +97,6 @@ class LDAPUserRepository(UserRepository):
                 return None, ""
 
             return avatar_data, "image/jpeg"  # Adjust MIME type if necessary
+
+    async def verify_basic_credentials(username: str, password: str) -> bool:
+        pass

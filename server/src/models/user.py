@@ -10,6 +10,8 @@ class User(BaseModel):
     )
 
     id: str
+    username: str
+    email: str
     created_at: datetime | None = None
     name: str | None = None
     avatar_url: str | None = None
