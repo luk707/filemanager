@@ -8,29 +8,18 @@ from fastapi import HTTPException, UploadFile, status  # TODO: Remove FastAPI de
 from minio import Minio
 from minio.commonconfig import CopySource
 from minio.error import S3Error
-from src.clients.minio import client
 from src.models.file import DirectoryListing, directory_listing_from_object
 from src.repositories.files.base import FileRepository
-from src.configuration import MinioStorageBackendConfiguration
 
 
 class MinioFileRepository(FileRepository):
     def __init__(
         self,
-        configuration: MinioStorageBackendConfiguration,
+        client: Minio,
         logger: logging.Logger,
     ):
         self.logger = logger
-        self.client = Minio(
-            endpoint=configuration.endpoint,
-            access_key=configuration.access_key.get_secret_value()
-            if configuration.access_key is not None
-            else None,
-            secret_key=configuration.secret_key.get_secret_value()
-            if configuration.secret_key is not None
-            else None,
-            secure=configuration.secure,
-        )
+        self.client = client
 
     async def stat(
         self, workspace_id: str, path: Optional[str] = None

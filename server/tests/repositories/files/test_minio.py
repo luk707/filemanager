@@ -1,4 +1,5 @@
 import pytest
+from minio import Minio
 from minio.datatypes import Object
 from minio.error import S3Error
 from src.models.file import directory_listing_from_object
@@ -7,8 +8,7 @@ from src.repositories.files.minio import MinioFileRepository
 
 @pytest.fixture
 def test_client(mocker):
-    mock_minio_client = mocker.patch("src.repositories.files.minio.client")
-    yield mock_minio_client
+    yield mocker.MagicMock(spec=Minio)
 
 
 @pytest.mark.asyncio
@@ -32,7 +32,7 @@ async def test_stat_successful(
         ),
     ]
     test_client.list_objects = mocker.MagicMock(return_value=mock_reponse)
-    repository = MinioFileRepository(None)
+    repository = MinioFileRepository(test_client, None)
     response = await repository.stat("test_workspace_id", "some/path")
     test_client.list_objects.assert_called_once_with(
         "test_workspace_id", prefix="some/path/"
@@ -59,7 +59,7 @@ async def test_stat_failure(
             None,
         )
     )
-    repository = MinioFileRepository(None)
+    repository = MinioFileRepository(test_client, None)
     with pytest.raises(S3Error):
         await repository.stat("test_workspace_id", "some/path")
         test_client.list_objects.assert_called_once_with(
