@@ -53,7 +53,11 @@ class LDAPIdentityBackendConfiguration(BaseModel):
     provider: Literal[IdentityBackendProvider.LDAP] = IdentityBackendProvider.LDAP
     host: str
     port: int
-    attributes: dict[str, str]
+    base_dn: str
+    user_filter: str
+    bind_dn: str
+    bind_password: SecretStr
+    attribute_map: dict[str, str]
 
 
 IdentityBackendConfiguration = Annotated[

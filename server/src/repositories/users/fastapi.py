@@ -15,20 +15,9 @@ def get_user_repository(
     configuration: ConfigurationDependency,
 ):
     match configuration.identity_backend:
-        case LDAPIdentityBackendConfiguration(
-            host=host,
-            port=port,
-            attributes=attributes,
-        ):
-            from ldap3 import Server
-
+        case LDAPIdentityBackendConfiguration() as ldap_configuration:
             return LDAPUserRepository(
-                Server(
-                    host=host,
-                    port=port,
-                    get_info="ALL",
-                ),
-                attributes,
+                ldap_configuration,
                 logger,
             )
 
