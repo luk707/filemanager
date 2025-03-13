@@ -16,6 +16,7 @@ import {
   Sparkles,
   Star,
   User,
+  Users,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
@@ -151,6 +152,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               url: "/preferences",
               icon: Settings2,
               isActive: !!matchPath("/preferences", location.pathname),
+            },
+            {
+              title: "User Management",
+              url: "/user-management",
+              icon: Users,
+              isActive: !!matchPath("/users", location.pathname),
             },
           ]}
         />
