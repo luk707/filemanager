@@ -1,10 +1,14 @@
+import mimetypes
+
 from fastapi import (
+    Response,
     FastAPI,
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.routes.file import router as file_router
+from src.repositories.users.fastapi import UserRepositoryDependency
 
 app = FastAPI()
 
@@ -22,6 +26,7 @@ app.add_middleware(
 
 
 app.include_router(file_router)
+
 
 @app.get(
     "/ready",
@@ -42,3 +47,21 @@ async def ready():
     Typically used for Kubernetes or load balancer health checks.
     """
     pass
+
+
+@app.get("/users")
+async def get_users(
+    user_repository: UserRepositoryDependency,
+):
+    return await user_repository.get_users()
+
+
+@app.get("/users/{user_id}/avatar")
+async def get_user_avatar(user_repository: UserRepositoryDependency, user_id: str):
+    data, content_type = await user_repository.get_user_avatar(user_id)
+    ext = mimetypes.guess_extension(content_type)
+    return Response(
+        content=data,
+        media_type=content_type,
+        headers={"Content-Disposition": f"attachment; filename={user_id}{ext}"},
+    )

@@ -41,12 +41,34 @@ StorageBackendConfiguration = Annotated[
 ]
 
 
+class IdentityBackendProvider(str, Enum):
+    LDAP = "ldap"
+
+
+class LDAPIdentityBackendConfiguration(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_kebab,
+        populate_by_name=True,
+    )
+    provider: Literal[IdentityBackendProvider.LDAP] = IdentityBackendProvider.LDAP
+    host: str
+    port: int
+    attributes: dict[str, str]
+
+
+IdentityBackendConfiguration = Annotated[
+    Union[LDAPIdentityBackendConfiguration],
+    Field(discriminator="provider"),
+]
+
+
 class Configuration(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_kebab,
         populate_by_name=True,
     )
 
+    identity_backend: IdentityBackendConfiguration
     storage_backend: StorageBackendConfiguration
 
 
