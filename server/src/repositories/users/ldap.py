@@ -75,7 +75,7 @@ class LDAPUserRepository(UserRepository):
 
         avatar_attribute = self.configuration.attribute_map["avatar"]
 
-        with self.get_connection() as connection:
+        with self.get_bind_connection() as connection:
             connection.search(
                 self.configuration.base_dn,
                 f"({self.configuration.attribute_map['id']}={id})",
