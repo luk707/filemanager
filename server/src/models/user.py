@@ -14,4 +14,4 @@ class User(BaseModel):
     email: str
     created_at: datetime | None = None
     name: str | None = None
-    avatar_url: str | None = None
+    avatar_url: HttpUrl | None = None
