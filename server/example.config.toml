@@ -1,0 +1,8 @@
+# This is an example configuration file
+
+[storage-backend]
+provider = "minio"
+endpoint = "127.0.0.1:9000"
+access-key = "*****"
+secret-key = "*****"
+secure = false

@@ -17,6 +17,7 @@ from minio.error import S3Error
 
 from src.models.file import DirectoryListing
 from src.repositories.files.fastapi import FileRepositoryDependency
+from src.configuration import Configuration, ConfigurationDependency
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")

@@ -8,3 +8,6 @@ __pycache__/
 
 # Ignore logs
 *.log
+
+# Ignore configuration
+config.toml
