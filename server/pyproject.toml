@@ -3,7 +3,7 @@ name = "filemanager-server"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Luke Harris",email = "6074660+luk707@users.noreply.github.com"}
+    { name = "Luke Harris", email = "6074660+luk707@users.noreply.github.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -15,7 +15,8 @@ dependencies = [
     "humanize (>=4.12.1,<5.0.0)",
     "pytest (>=8.3.5,<9.0.0)",
     "pytest-mock (>=3.14.0,<4.0.0)",
-    "pytest-asyncio (>=0.25.3,<0.26.0)"
+    "pytest-asyncio (>=0.25.3,<0.26.0)",
+    "toml (>=0.10.2,<0.11.0)",
 ]
 
 [tool.poetry]

@@ -21,6 +21,7 @@ from src.repositories.files.fastapi import FileRepositoryDependency
 app = FastAPI()
 logger = logging.getLogger("uvicorn.error")
 
+
 def get_logger():
     return logger
 

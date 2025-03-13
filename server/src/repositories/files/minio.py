@@ -5,16 +5,21 @@ from typing import Optional
 
 import humanize
 from fastapi import HTTPException, UploadFile, status  # TODO: Remove FastAPI dependency
+from minio import Minio
 from minio.commonconfig import CopySource
 from minio.error import S3Error
-from src.clients.minio import client
 from src.models.file import DirectoryListing, directory_listing_from_object
 from src.repositories.files.base import FileRepository
 
 
 class MinioFileRepository(FileRepository):
-    def __init__(self, logger: logging.Logger):
+    def __init__(
+        self,
+        client: Minio,
+        logger: logging.Logger,
+    ):
         self.logger = logger
+        self.client = client
 
     async def stat(
         self, workspace_id: str, path: Optional[str] = None
@@ -34,7 +39,7 @@ class MinioFileRepository(FileRepository):
         """
 
         objects = list(
-            client.list_objects(
+            self.client.list_objects(
                 workspace_id, prefix=f"{path}/" if path is not None else None
             )
         )
@@ -70,8 +75,8 @@ class MinioFileRepository(FileRepository):
           HTTPException: If the file is not found in the specified workspace.
         """
 
-        file_object = client.stat_object(workspace_id, path)
-        response = client.get_object(workspace_id, path)
+        file_object = self.client.stat_object(workspace_id, path)
+        response = self.client.get_object(workspace_id, path)
         file_content = b"".join(chunk for chunk in response.stream())
         filename = os.path.basename(path)
 
@@ -99,7 +104,7 @@ class MinioFileRepository(FileRepository):
 
             file_stream = io.BytesIO(await file.read())
 
-            client.put_object(
+            self.client.put_object(
                 workspace_id,
                 upload_path,
                 file_stream,
@@ -124,7 +129,7 @@ class MinioFileRepository(FileRepository):
         """
         empty_data = bytes()
         data_stream = io.BytesIO(empty_data)
-        client.put_object(
+        self.client.put_object(
             workspace_id,
             path + "/",
             data=data_stream,
@@ -145,12 +150,15 @@ class MinioFileRepository(FileRepository):
         """
         errors_count: int = 0
 
-        objects = list(client.list_objects(workspace_id, prefix=path + "/"))
+        objects = list(self.client.list_objects(workspace_id, prefix=path + "/"))
 
         # Fix DeleteObject undefined - comes from parent?
-        errors = client.remove_objects(
+        errors = self.client.remove_objects(
             workspace_id,
-            [client.remove_object(workspace_id, obj.object_name) for obj in objects],
+            [
+                self.client.remove_object(workspace_id, obj.object_name)
+                for obj in objects
+            ],
         )
 
         self.logger.info(f"Added {len(objects)} objects to be removed")
@@ -186,7 +194,7 @@ class MinioFileRepository(FileRepository):
         """
         try:
             # Check if the file exists
-            client.stat_object(workspace_id, path)
+            self.client.stat_object(workspace_id, path)
         except S3Error:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -194,7 +202,7 @@ class MinioFileRepository(FileRepository):
             )
 
         # Perform the deletion
-        client.remove_object(workspace_id, path)
+        self.client.remove_object(workspace_id, path)
         self.logger.info(f"DELETED {path} from {workspace_id}")
 
         # -- for a later date --
@@ -229,7 +237,7 @@ class MinioFileRepository(FileRepository):
         )
         try:
             source = CopySource(workspace_id, path)
-            client.copy_object(target_workspace_id, target_path, source)
+            self.client.copy_object(target_workspace_id, target_path, source)
 
         except S3Error:
             raise HTTPException(
