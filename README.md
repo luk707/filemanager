@@ -22,7 +22,7 @@ Ensure you have [docker installed](#installing-docker-and-docker-compose), and r
 
 ### Backend
 
-`fastapi dev main.py`
+`fastapi dev src/main.py`
 
 ### Frontend
 
