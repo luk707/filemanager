@@ -1,14 +1,10 @@
-import time
-
-import humanize
 from fastapi import (
     FastAPI,
-    Request,
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.repositories.logger import LoggerDependency
+from src.routes.file import router as file_router
 
 app = FastAPI()
 
@@ -25,34 +21,7 @@ app.add_middleware(
 )
 
 
-@app.middleware("http")
-async def add_process_time_header(
-    request: Request,
-    logger: LoggerDependency,
-    call_next,
-):
-    """Logs endpoint processing time
-
-    Args:
-        call_next: the endpoint to be called
-        request (Request): params for the endpoint
-
-    Returns:
-        response (the relavant endpoint's response time in ms)
-    """
-    start_time = time.perf_counter()
-    response = await call_next(request)
-    process_time = time.perf_counter() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    logger.info(
-        f"{request.client.host}:{request.client.port} - "
-        f'"{request.method} {request.url.path} HTTP/{request.scope.get("http_version", "unknown")}" '
-        f"took {humanize.naturaldelta(process_time, minimum_unit='milliseconds')}"
-    )
-    return response
-
-
-app.include_router()
+app.include_router(file_router)
 
 @app.get(
     "/ready",

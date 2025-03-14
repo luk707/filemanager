@@ -11,8 +11,7 @@ from fastapi import (
 from minio.error import S3Error
 from src.models.file import DirectoryListing
 from src.repositories.files.fastapi import FileRepositoryDependency
-
-from server.src.repositories.logger import LoggerDependency
+from src.repositories.logger import LoggerDependency
 
 router = APIRouter()
 
