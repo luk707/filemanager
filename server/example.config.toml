@@ -1,5 +1,9 @@
 # This is an example configuration file
 
+[brand]
+# The name of your organization
+organization-name = "Acme Inc."
+
 [identity-backend]
 # Specify the identity backend provider type, currently only supports LDAP
 provider = "ldap"

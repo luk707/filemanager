@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic.alias_generators import to_camel
 from enum import Enum
 from typing import Annotated, Literal, Union
 from functools import lru_cache
@@ -16,6 +17,15 @@ def to_kebab(snake: str) -> str:
         The converted kebab-case string.
     """
     return snake.replace("_", "-")
+
+
+class BrandConfiguration(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_kebab,
+        populate_by_name=True,
+    )
+
+    organization_name: str
 
 
 class StorageBackendProvider(str, Enum):
@@ -72,6 +82,7 @@ class Configuration(BaseModel):
         populate_by_name=True,
     )
 
+    brand: BrandConfiguration
     identity_backend: IdentityBackendConfiguration
     storage_backend: StorageBackendConfiguration
 
@@ -86,3 +97,12 @@ ConfigurationDependency = Annotated[
     Configuration,
     Depends(get_configuration),
 ]
+
+
+class ServerInfo(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
+
+    organization_name: str
