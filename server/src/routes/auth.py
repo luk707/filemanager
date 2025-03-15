@@ -1,20 +1,28 @@
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import jwt
 
-from src.models.user import User
 from src.repositories.users.fastapi import UserRepositoryDependency
+from src.configuration import ConfigurationDependency
 
 
 router = APIRouter()
 
 
-@router.get("/auth/token")
+@router.get(
+    "/auth/token",
+    status_code=status.HTTP_200_OK,
+    summary="Get an authentication token",
+    description="Creates a new signed JWT from the users credentials.",
+)
 async def get_auth_token(
     credentials: Annotated[HTTPBasicCredentials, Depends(HTTPBasic())],
+    configuration: ConfigurationDependency,
     user_repository: UserRepositoryDependency,
-) -> User:
+) -> str:
     user = await user_repository.verify_basic_credentials(
         credentials.username,
         credentials.password,
@@ -24,4 +32,9 @@ async def get_auth_token(
             status.HTTP_401_UNAUTHORIZED,
             "Invalid credentials",
         )
-    return user
+
+    return jwt.encode(
+        {"iat": datetime.now(tz=timezone.utc), "sub": user.id},
+        configuration.identity.jwt_secret.get_secret_value(),
+        algorithm="HS256",
+    )
