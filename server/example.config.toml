@@ -1,8 +1,36 @@
 # This is an example configuration file
 
+[brand]
+# The name of your organization
+organization-name = "Acme Inc."
+
+[identity-backend]
+# Specify the identity backend provider type, currently only supports LDAP
+provider = "ldap"
+# The host of the LDAP instance
+host = "ldap://127.0.0.1"
+# The port of the LDAP instance
+port = 3890
+# The base distinguished name for users
+base-dn = "ou=people,dc=example,dc=com"
+# An LDAP search filter to find users
+user-filter = "(&(objectClass=person)(memberof=cn=filemanager_user,ou=groups,dc=example,dc=com))"
+# The distinguished name of the service account
+bind-dn = "uid=sa_filemanager,ou=people,dc=example,dc=com"
+# Credentials of the service account
+bind-password = "*****"
+# A mapping of LDAP attributes to the file manager user model
+attribute-map = { id = "uuid", username = "uid", email = "mail", createdAt = "createtimestamp", name = "cn", avatar = "avatar" }
+
+
 [storage-backend]
+# Specify the storage backend provider type, currently only supports MinIO
 provider = "minio"
+# The endpoint of the MinIO instance
 endpoint = "127.0.0.1:9000"
+# The MinIO access key
 access-key = "*****"
+# The MinIO access key
 secret-key = "*****"
+# Specify wether the connection should be made over HTTP/HTTPS
 secure = false
