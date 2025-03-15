@@ -7,10 +7,10 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.routes.file import router as file_router
 from src.repositories.users.fastapi import UserRepositoryDependency
-from src.configuration import ConfigurationDependency, ServerInfo
 from src.routes.auth import router as auth_router
+from src.routes.file import router as file_router
+from src.routes.info import router as info_router
 
 app = FastAPI()
 
@@ -28,6 +28,7 @@ app.add_middleware(
 
 
 app.include_router(auth_router)
+app.include_router(info_router)
 app.include_router(file_router)
 
 
@@ -50,13 +51,6 @@ async def ready():
     Typically used for Kubernetes or load balancer health checks.
     """
     pass
-
-
-@app.get("/info")
-async def get_info(configuration: ConfigurationDependency) -> ServerInfo:
-    return ServerInfo(
-        organization_name=configuration.brand.organization_name,
-    )
 
 
 @app.get("/users")
