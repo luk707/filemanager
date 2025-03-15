@@ -98,5 +98,51 @@ class LDAPUserRepository(UserRepository):
 
             return avatar_data, "image/jpeg"  # Adjust MIME type if necessary
 
-    async def verify_basic_credentials(username: str, password: str) -> bool:
-        pass
+    async def verify_basic_credentials(
+        self, username: str, password: str
+    ) -> User | None:
+        try:
+            user_connection = Connection(
+                self.ldap_server,
+                user=f"{self.configuration.attribute_map['username']}={username},{self.configuration.base_dn}",
+                password=password,
+                auto_bind=True,
+            )
+            user_connection.unbind()
+        except Exception as e:
+            self.logger.warning(f"Authentication failed for user {username}: {e}")
+            return None
+
+        search_attributes = {
+            key: attr
+            for key, attr in self.configuration.attribute_map.items()
+            if key not in ["avatar", "groups"]
+        }
+
+        with self.get_bind_connection() as connection:
+            connection.search(
+                self.configuration.base_dn,
+                f"({self.configuration.attribute_map['username']}={username})",
+                "SUBTREE",
+                attributes=[attr for attr in self.configuration.attribute_map.values()],
+            )
+
+            if not connection.entries:
+                self.logger.warning(
+                    f"User {username} not found in LDAP after authentication"
+                )
+                return None
+
+            entry = connection.entries[0]
+            return User(
+                **{
+                    user_field: entry[ldap_field].values[0]
+                    if entry[ldap_field]
+                    else None
+                    for user_field, ldap_field in search_attributes.items()
+                },
+                avatar_url=f"http://localhost:8000/users/{entry[self.configuration.attribute_map['id']].values[0]}/avatar"
+                if "avatar" in self.configuration.attribute_map
+                and len(entry[self.configuration.attribute_map["avatar"]].values) > 0
+                else None,
+            )

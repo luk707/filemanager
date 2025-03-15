@@ -1,4 +1,5 @@
 import { GalleryVerticalEnd } from "lucide-react";
+import { getInfo } from "~/api/info";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -9,8 +10,14 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import type { Route } from "./+types/login";
 
-export default function login() {
+export async function loader() {
+  return await getInfo();
+}
+
+export default function login({ loaderData }: Route.ComponentProps) {
+  const info = loaderData;
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -18,7 +25,7 @@ export default function login() {
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <GalleryVerticalEnd className="size-4" />
           </div>
-          Acme Inc.
+          {info.organizationName}
         </a>
         <div className="flex flex-col gap-6">
           <Card>

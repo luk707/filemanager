@@ -51,6 +51,14 @@ StorageBackendConfiguration = Annotated[
 ]
 
 
+class IdentityConfiguration(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_kebab,
+        populate_by_name=True,
+    )
+    jwt_secret: SecretStr
+
+
 class IdentityBackendProvider(str, Enum):
     LDAP = "ldap"
 
@@ -83,6 +91,7 @@ class Configuration(BaseModel):
     )
 
     brand: BrandConfiguration
+    identity: IdentityConfiguration
     identity_backend: IdentityBackendConfiguration
     storage_backend: StorageBackendConfiguration
 

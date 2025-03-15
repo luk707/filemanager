@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.routes.file import router as file_router
 from src.repositories.users.fastapi import UserRepositoryDependency
 from src.configuration import ConfigurationDependency, ServerInfo
+from src.routes.auth import router as auth_router
 
 app = FastAPI()
 
@@ -27,6 +28,9 @@ app.add_middleware(
 
 
 app.include_router(file_router)
+
+
+app.include_router(auth_router)
 
 
 @app.get(
