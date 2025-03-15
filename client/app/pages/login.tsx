@@ -16,7 +16,7 @@ export async function loader() {
   return await getInfo();
 }
 
-export default function login({ loaderData }: Route.ComponentProps) {
+export default function LoginPage({ loaderData }: Route.ComponentProps) {
   const info = loaderData;
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
