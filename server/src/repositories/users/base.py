@@ -9,6 +9,12 @@ class UserRepository(ABC):
     ) -> list[User]: ...
 
     @abstractmethod
+    async def get_user_by_id(
+        self,
+        id: str,
+    ) -> User | None: ...
+
+    @abstractmethod
     async def get_user_avatar(
         self,
         id: str,
@@ -19,4 +25,10 @@ class UserRepository(ABC):
         self,
         username: str,
         password: str,
+    ) -> User | None: ...
+
+    @abstractmethod
+    async def verify_token(
+        self,
+        token: str,
     ) -> User | None: ...

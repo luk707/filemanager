@@ -33,8 +33,15 @@ async def get_auth_token(
             "Invalid credentials",
         )
 
+    iat = datetime.now(tz=timezone.utc)
+    exp = iat + configuration.identity.jwt_expiry
+
     return jwt.encode(
-        {"iat": datetime.now(tz=timezone.utc), "sub": user.id},
+        {
+            "iat": iat,
+            "exp": exp,
+            "sub": user.id,
+        },
         configuration.identity.jwt_secret.get_secret_value(),
         algorithm="HS256",
     )

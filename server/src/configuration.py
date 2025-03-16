@@ -5,6 +5,7 @@ from typing import Annotated, Literal, Union
 from functools import lru_cache
 import toml
 from fastapi import Depends
+from datetime import timedelta
 
 
 def to_kebab(snake: str) -> str:
@@ -56,7 +57,9 @@ class IdentityConfiguration(BaseModel):
         alias_generator=to_kebab,
         populate_by_name=True,
     )
+
     jwt_secret: SecretStr
+    jwt_expiry: timedelta
 
 
 class IdentityBackendProvider(str, Enum):

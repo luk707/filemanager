@@ -1,15 +1,18 @@
 import logging
 from contextlib import contextmanager
 
+import jwt
 from ldap3 import Server, Connection
+
 from src.models.user import User
 from src.repositories.users.base import UserRepository
-from src.configuration import LDAPIdentityBackendConfiguration
+from src.configuration import IdentityConfiguration, LDAPIdentityBackendConfiguration
 
 
 class LDAPUserRepository(UserRepository):
     def __init__(
         self,
+        identity_configuration: IdentityConfiguration,
         configuration: LDAPIdentityBackendConfiguration,
         logger: logging.Logger,
     ):
@@ -18,6 +21,7 @@ class LDAPUserRepository(UserRepository):
             port=configuration.port,
             get_info="ALL",
         )
+        self.identity_configuration = identity_configuration
         self.configuration = configuration
         self.logger = logger
 
@@ -66,6 +70,40 @@ class LDAPUserRepository(UserRepository):
                 )
                 for entry in connection.entries
             ]
+
+    async def get_user_by_id(self, id: str) -> User | None:
+        search_attributes = {
+            key: attr
+            for key, attr in self.configuration.attribute_map.items()
+            if key not in ["avatar", "groups"]
+        }
+
+        with self.get_bind_connection() as connection:
+            connection.search(
+                self.configuration.base_dn,
+                f"({self.configuration.attribute_map['id']}={id})",
+                "SUBTREE",
+                attributes=[attr for attr in self.configuration.attribute_map.values()],
+            )
+
+            if not connection.entries:
+                self.logger.warning(f"User {id} not found in LDAP")
+                return None
+
+            entry = connection.entries[0]
+            return User(
+                **{
+                    user_field: entry[ldap_field].values[0]
+                    if entry[ldap_field]
+                    else None
+                    for user_field, ldap_field in search_attributes.items()
+                },
+                # TODO: Remove hard coded API url
+                avatar_url=f"http://localhost:8000/users/{entry[self.configuration.attribute_map['id']].values[0]}/avatar"
+                if "avatar" in self.configuration.attribute_map
+                and len(entry[self.configuration.attribute_map["avatar"]].values) > 0
+                else None,
+            )
 
     async def get_user_avatar(self, id: str) -> tuple[bytes, str]:
         """Fetches a user's avatar from LDAP."""
@@ -146,3 +184,12 @@ class LDAPUserRepository(UserRepository):
                 and len(entry[self.configuration.attribute_map["avatar"]].values) > 0
                 else None,
             )
+
+    async def verify_token(self, token: str) -> User | None:
+        token_claims = jwt.decode(
+            token,
+            key=self.identity_configuration.jwt_secret.get_secret_value(),
+            algorithms=["HS256"],
+        )
+        user = await self.get_user_by_id(token_claims["sub"])
+        return user

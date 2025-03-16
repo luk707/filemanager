@@ -17,6 +17,7 @@ def get_user_repository(
     match configuration.identity_backend:
         case LDAPIdentityBackendConfiguration() as ldap_configuration:
             return LDAPUserRepository(
+                configuration.identity,
                 ldap_configuration,
                 logger,
             )
