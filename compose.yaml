@@ -13,3 +13,16 @@ services:
     command: server /data --console-address ":9090"
     volumes:
       - ./data:/data
+  lldap:
+    image: lldap/lldap:stable
+    ports:
+      - "3890:3890"
+      - "17170:17170"
+    volumes:
+      - "./ldap:/data"
+    environment:
+      - TZ=UTC
+      - LLDAP_JWT_SECRET=48c69cb4ec0cc4af3d05451cd89b416b 
+      - LLDAP_KEY_SEED=e3f54a7a15a067ac49c8a45fab73fb50
+      - LLDAP_LDAP_BASE_DN=dc=example,dc=com
+      - LLDAP_LDAP_USER_PASS=password

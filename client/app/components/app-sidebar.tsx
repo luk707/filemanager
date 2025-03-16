@@ -16,11 +16,18 @@ import {
   Sparkles,
   Star,
   User,
+  Users,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
 import { WorkspaceSwitcher } from "~/components/workspace-switcher";
-import { Sidebar, SidebarHeader, SidebarRail } from "~/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "~/components/ui/sidebar";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -33,6 +40,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { useFileUpload } from "~/hooks/use-file-upload";
 import { matchPath, useLocation } from "react-router";
+import { NavUser } from "./nav-user";
 
 // This is sample data.
 const data = {
@@ -147,14 +155,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               icon: Star,
             },
             {
-              title: "Preferences",
-              url: "/preferences",
-              icon: Settings2,
-              isActive: !!matchPath("/preferences", location.pathname),
+              title: "User Management",
+              url: "/user-management",
+              icon: Users,
+              isActive: !!matchPath("/users", location.pathname),
             },
           ]}
         />
       </SidebarHeader>
+      <SidebarContent />
+      <SidebarFooter>
+        <NavUser
+          name="Luke Harris"
+          email="luke.harris@example.com"
+          avatar="http://localhost:8000/users/c056f782-5948-3eb5-bc92-1c4ec132b2ad/avatar"
+        />
+      </SidebarFooter>
     </Sidebar>
   );
 }

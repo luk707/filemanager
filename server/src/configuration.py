@@ -1,9 +1,11 @@
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic.alias_generators import to_camel
 from enum import Enum
 from typing import Annotated, Literal, Union
 from functools import lru_cache
 import toml
 from fastapi import Depends
+from datetime import timedelta
 
 
 def to_kebab(snake: str) -> str:
@@ -16,6 +18,15 @@ def to_kebab(snake: str) -> str:
         The converted kebab-case string.
     """
     return snake.replace("_", "-")
+
+
+class BrandConfiguration(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_kebab,
+        populate_by_name=True,
+    )
+
+    organization_name: str
 
 
 class StorageBackendProvider(str, Enum):
@@ -41,12 +52,50 @@ StorageBackendConfiguration = Annotated[
 ]
 
 
+class IdentityConfiguration(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_kebab,
+        populate_by_name=True,
+    )
+
+    jwt_secret: SecretStr
+    jwt_expiry: timedelta
+
+
+class IdentityBackendProvider(str, Enum):
+    LDAP = "ldap"
+
+
+class LDAPIdentityBackendConfiguration(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_kebab,
+        populate_by_name=True,
+    )
+    provider: Literal[IdentityBackendProvider.LDAP] = IdentityBackendProvider.LDAP
+    host: str
+    port: int
+    base_dn: str
+    user_filter: str
+    bind_dn: str
+    bind_password: SecretStr
+    attribute_map: dict[str, str]
+
+
+IdentityBackendConfiguration = Annotated[
+    Union[LDAPIdentityBackendConfiguration],
+    Field(discriminator="provider"),
+]
+
+
 class Configuration(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_kebab,
         populate_by_name=True,
     )
 
+    brand: BrandConfiguration
+    identity: IdentityConfiguration
+    identity_backend: IdentityBackendConfiguration
     storage_backend: StorageBackendConfiguration
 
 
@@ -60,3 +109,12 @@ ConfigurationDependency = Annotated[
     Configuration,
     Depends(get_configuration),
 ]
+
+
+class ServerInfo(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
+
+    organization_name: str
