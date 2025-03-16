@@ -35,7 +35,7 @@ export function LoginPage({ organizationName }: LoginPageProps) {
                 <div className="grid gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="email">Username</Label>
-                    <Input id="username" required />
+                    <Input id="username" name="username" required />
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
@@ -47,7 +47,12 @@ export function LoginPage({ organizationName }: LoginPageProps) {
                         Forgot your password?
                       </a>
                     </div>
-                    <Input id="password" type="password" required />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                    />
                   </div>
                   <Button type="submit" className="w-full">
                     Login
